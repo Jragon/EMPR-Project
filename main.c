@@ -29,6 +29,7 @@ void I2C_SweepBus() {
 }
 
 int main(int argc, char* argv[]) {
+    serial_init();
     serial_printf("reee");
     i2c1_init();
     serial_printf("eeeeer");

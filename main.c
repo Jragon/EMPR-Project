@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "lib/serial.h"
+#include "libs/serial.h"
 
 int main(int argc, char* argv[]) {
     serial_init();

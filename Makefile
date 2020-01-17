@@ -37,7 +37,7 @@ LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
 
 # Target locations
-LIBSC		= lib/*.c
+LIBSC		= libs/*.c
 LIBS		= $(shell echo $(LIBSC) | sed s/\\.c/\\.o/g)
 OBJ			= $(LIBS) main.o
 

@@ -21,7 +21,8 @@ CMSISFL=$(CMSIS)/lib/core_cm3.o \
 		$(CMSIS)/lib/startup_LPC17xx.o
 LDSCRIPT = $(CMSIS)/lib/ldscript_rom_gnu.ld
 
-EXECNAME	= bin/exec
+EXECFILENAME = exec
+EXECNAME	   = bin/exec
 
 # Compiler Flags
 WARN= -Wall
@@ -55,7 +56,6 @@ main: $(OBJ) libs
 	/opt/york/cs/net/bin/arm-none-eabi-gcc -o $(EXECNAME) $(OBJ) $(LDFLAGS)
 	$(OBJCOPY) -I elf32-little -O binary $(EXECNAME) $(EXECNAME).bin
 
-
 clean:
 	rm -f `find . | grep \~`
 	rm -f *.swp *.o */*.o */*/*.o *.log
@@ -67,6 +67,7 @@ USER:=$(shell whoami)
 
 install:
 	@echo "Copying " $(EXECNAME) "to the MBED file system"
+	-rm /media/$(USER)/MBED/$(EXECFILENAME).bin
 	cp $(EXECNAME).bin /media/$(USER)/MBED &
 	sync
 	@echo "Now press the reset button on all MBED file systems"

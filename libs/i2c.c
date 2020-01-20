@@ -4,7 +4,7 @@
 
 #include "i2c.h"
 
-void i2c1_init() {
+void i2c_init() {
     // only initilize once
     static Bool initilized = FALSE;
 
@@ -25,4 +25,14 @@ void i2c1_init() {
     I2C_Init(I2C1DEV, 100000);
     I2C_Cmd(I2C1DEV, ENABLE);
     initilized = TRUE;
+}
+
+void i2c_send_data(uint32_t address, uint8_t *data, uint32_t length) {
+    I2C_M_SETUP_Type cfg;
+    cfg.sl_addr7bit = address;
+    cfg.rx_data = NULL;
+    cfg.tx_data = data;
+    cfg.tx_length = length;
+    cfg.retransmissions_max = 2;
+    I2C_MasterTransferData(I2C1DEV, &cfg, I2C_TRANSFER_POLLING);
 }

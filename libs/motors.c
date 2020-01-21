@@ -4,6 +4,22 @@
 #include "motors.h"
 #include "i2c.h"
 #include "systick_delay.h"
+#include "serial.h"
+#include "util_macros.h"
+
+static Motor_t motor_x = {
+    MOTORS_XY_LATCH_ADDRESS,
+    MOTOR_STEPX,
+    SWITCH_X_MASK,
+    0
+};
+
+static Motor_t motor_y = {
+    MOTORS_XY_LATCH_ADDRESS,
+    MOTOR_STEPY,
+    SWITCH_Y_MASK,
+    0
+};
 
 void setup_switches() {
     uint8_t data = 0xF;
@@ -27,26 +43,45 @@ int check_switch(uint8_t mask) {
     }
 }
 
-int move(uint8_t *seq, uint8_t mask, unsigned int steps) {
-    for (int i = 0, j = 0; i < steps; i++, j = (j + 1) % 4) {
-        i2c_send_data(MOTORS_XY_LATCH_ADDRESS, seq + j, 1);
+int move(Motor_t *motor, unsigned int steps, uint8_t direction) {
+    while (steps > 0) {
+        if (direction == 1) {
+            motor->step = motor->step < 4 ? motor->step + 1 : 0;
+        } else {
+            motor->step = motor->step > 0 ? motor->step - 1 : 4;
+        }
 
-        if (check_switch(mask)) {
+        // serial_printf("step: %d ", motor->step);
+        i2c_send_data(motor->address, motor->steps + motor->step, 1);
+        // serial_printf("addr: %X, steps: %X\r\n", motor->address, motor->steps + motor->step);
+
+        if (check_switch(motor->mask) == 1) {
             return -1;
         }
+
+        steps--;
+        systick_delay_blocking(50);
     }
 
-    return 1;
+    return 0;
 }
 
-int movex(unsigned int steps) {
-    uint8_t data[] = MOTOR_STEPX;
-    return move(data, SWITCH_X_MASK, steps);
+int movex(int steps) {
+    uint8_t direction = 1;
+    if (steps < 0) {
+        direction = 0;
+    }
+
+    return move(&motor_x, ABS(steps), direction);
 }
 
-int movey(unsigned int steps) {
-    uint8_t data[] = MOTOR_STEPY;
-    return move(data, SWITCH_Y_MASK, steps);
+int movey(int steps) {
+    uint8_t direction = 1;
+    if (steps < 0) {
+        direction = 0;
+    }
+
+    return move(&motor_y, ABS(steps), direction);
 }
 
 int home(uint8_t *steps, uint8_t mask) {

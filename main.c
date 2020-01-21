@@ -7,6 +7,7 @@
 #include "libs/motors.h"
 
 
+
 int main() {
     serial_init();
     systick_init();
@@ -14,14 +15,16 @@ int main() {
     serial_printf("hello\r\n");
     setup_switches();
 
-    int xsteps = home_x();
-    int ysteps = home_y();
+    // int xsteps = home_x();
+    // int ysteps = home_y();
 
-    serial_printf("home steps x: %d\r\n", xsteps);
-    serial_printf("home steps y: %d\r\n", ysteps);
+    // serial_printf("home steps x: %d\r\n", xsteps);
+    // serial_printf("home steps y: %d\r\n", ysteps);
 
-    movex(xsteps);
-    movey(ysteps);
+    movex(100);
+    movex(-100);
+    movey(100);
+    movey(-100);
 
     serial_printf("moved back\r\n");
 

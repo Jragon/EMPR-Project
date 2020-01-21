@@ -24,11 +24,18 @@
 #define SWITCH_Y_MASK 0x01
 #define SWITCH_Z_MASK 0x03
 
+typedef struct Motor_t {
+    uint8_t address;
+    uint8_t steps[4];
+    uint8_t mask;
+    uint8_t step;
+} Motor_t;
+
 void setup_switches();
 int check_switch(uint8_t mask);
 int home(uint8_t *steps, uint8_t mask);
 int home_x();
 int home_y();
-int move(uint8_t *seq, uint8_t mask, unsigned int steps);
-int movex(unsigned int steps);
-int movey(unsigned int steps);
+int move(Motor_t *motor, unsigned int steps, uint8_t direction);
+int movex(int steps);
+int movey(int steps);

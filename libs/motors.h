@@ -1,5 +1,7 @@
 #pragma once
 
+#define MOTOR_DELAY 500
+
 #define MOTORS_XY_LATCH_ADDRESS 0x3E
 
 #define MOTOR_STEPX_1 0x09
@@ -21,3 +23,9 @@
 #define SWITCH_X_MASK 0x02
 #define SWITCH_Y_MASK 0x01
 #define SWITCH_Z_MASK 0x03
+
+void setup_switches();
+int check_switch(uint8_t mask);
+void home(uint8_t *steps, uint8_t mask);
+void home_x();
+void home_y();

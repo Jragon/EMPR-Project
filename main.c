@@ -14,8 +14,16 @@ int main() {
     serial_printf("hello\r\n");
     setup_switches();
 
-    home_x();
-    home_y();
+    int xsteps = home_x();
+    int ysteps = home_y();
+
+    serial_printf("home steps x: %d\r\n", xsteps);
+    serial_printf("home steps y: %d\r\n", ysteps);
+
+    movex(xsteps);
+    movey(ysteps);
+
+    serial_printf("moved back\r\n");
 
     return 0;
 }

@@ -15,6 +15,6 @@ void i2c_init();
 */
 
 /**
-    @brief sends data with no recieve value 
+    @brief sends data with no recieve value
  */
 void i2c_send_data(uint32_t address, uint8_t *data, uint32_t length);

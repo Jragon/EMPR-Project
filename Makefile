@@ -26,7 +26,7 @@ EXECNAME	   = bin/exec
 
 # Compiler Flags
 WARN= -Wall
-CFLAGS= -O0 -std=gnu18 $(WARN) \
+CFLAGS= -O2 -std=gnu18 $(WARN) \
 		-mcpu=cortex-m3 -mthumb -mtune=cortex-m3 -march=armv7-m \
 		-D__thumb2__=1 -msoft-float -ggdb -mno-sched-prolog -fno-hosted  \
 		-mfix-cortex-m3-ldrd -ffunction-sections -fdata-sections \

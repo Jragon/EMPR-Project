@@ -27,27 +27,54 @@ int check_switch(uint8_t mask) {
     }
 }
 
+int move(uint8_t *seq, uint8_t mask, unsigned int steps) {
+    for (int i = 0, j = 0; i < steps; i++, j = (j + 1) % 4) {
+        i2c_send_data(MOTORS_XY_LATCH_ADDRESS, seq + j, 1);
 
-void home(uint8_t *steps, uint8_t mask) {
+        if (check_switch(mask)) {
+            return -1;
+        }
+    }
+
+    return 1;
+}
+
+int movex(unsigned int steps) {
+    uint8_t data[] = MOTOR_STEPX;
+    return move(data, SWITCH_X_MASK, steps);
+}
+
+int movey(unsigned int steps) {
+    uint8_t data[] = MOTOR_STEPY;
+    return move(data, SWITCH_Y_MASK, steps);
+}
+
+int home(uint8_t *steps, uint8_t mask) {
     int i = 0;
+    int j = 0;
     while (1) {
         i2c_send_data(MOTORS_XY_LATCH_ADDRESS, steps + i, 1);
+        // i2c_send_data(MOTORS_XY_LATCH_ADDRESS, steps + (i % 4), 1);
 
         if (check_switch(mask)) {
             break;
         }
 
+        // i++;
         i = (i + 1) % 4;
+        j++;
         systick_delay_blocking(MOTOR_DELAY);
     }
+
+    return j;
 }
 
-void home_x() {
+int home_x() {
     uint8_t data[] = MOTOR_STEPX_REVERSE;
-    home(data, SWITCH_X_MASK);
+    return home(data, SWITCH_X_MASK);
 }
 
-void home_y() {
+int home_y() {
     uint8_t data[] = MOTOR_STEPY_REVERSE;
-    home(data, SWITCH_Y_MASK);
+    return home(data, SWITCH_Y_MASK);
 }

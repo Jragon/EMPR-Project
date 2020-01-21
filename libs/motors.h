@@ -1,6 +1,6 @@
 #pragma once
 
-#define MOTOR_DELAY 500
+#define MOTOR_DELAY 50
 
 #define MOTORS_XY_LATCH_ADDRESS 0x3E
 
@@ -26,6 +26,9 @@
 
 void setup_switches();
 int check_switch(uint8_t mask);
-void home(uint8_t *steps, uint8_t mask);
-void home_x();
-void home_y();
+int home(uint8_t *steps, uint8_t mask);
+int home_x();
+int home_y();
+int move(uint8_t *seq, uint8_t mask, unsigned int steps);
+int movex(unsigned int steps);
+int movey(unsigned int steps);

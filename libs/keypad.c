@@ -58,19 +58,19 @@ uint8_t one_hot_decoder_4bit(uint8_t val) {
     val &= 0x0F;
 
     switch (val) {
-        case 0x01:
-            return 1;
+    case 0x01:
+        return 1;
 
-        case 0x02:
-            return 2;
+    case 0x02:
+        return 2;
 
-        case 0x04:
-            return 3;
+    case 0x04:
+        return 3;
 
-        case 0x08:
-            return 4;
+    case 0x08:
+        return 4;
 
-        default:
-            return 0;
+    default:
+        return 0;
     }
 }

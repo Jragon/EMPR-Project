@@ -8,14 +8,14 @@
 #include "util_macros.h"
 
 static Motor_t motor_x = {
-    MOTORS_XY_LATCH_ADDRESS,
+    MOTOR_XY_LATCH_ADDRESS,
     MOTOR_STEPX,
     SWITCH_X_MASK,
     0
 };
 
 static Motor_t motor_y = {
-    MOTORS_XY_LATCH_ADDRESS,
+    MOTOR_XY_LATCH_ADDRESS,
     MOTOR_STEPY,
     SWITCH_Y_MASK,
     0

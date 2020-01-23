@@ -43,73 +43,67 @@ int check_switch(uint8_t mask) {
     }
 }
 
-int move(Motor_t *motor, unsigned int steps, uint8_t direction) {
-    while (steps > 0) {
-        if (direction == 1) {
-            motor->step = motor->step < 4 ? motor->step + 1 : 0;
-        } else {
-            motor->step = motor->step > 0 ? motor->step - 1 : 4;
-        }
+void send_move(Motor_t *motor, uint8_t direction) {
+    if (direction == 1) {
+        motor->step = motor->step < 4 ? motor->step + 1 : 0;
+    } else {
+        motor->step = motor->step > 0 ? motor->step - 1 : 4;
+    }
+    i2c_send_data(motor->address, motor->steps + motor->step, 1);
+}
 
-        // serial_printf("step: %d ", motor->step);
-        i2c_send_data(motor->address, motor->steps + motor->step, 1);
-        // serial_printf("addr: %X, steps: %X\r\n", motor->address, motor->steps + motor->step);
+int move(Motor_t *motor, int steps) {
+    uint8_t direction = 1;
+    if (steps < 0) {
+        direction = 0;
+    }
+
+    steps = ABS(steps);
+    uint8_t delay = MOTOR_MAX_DELAY;
+
+    while (steps > 0) {
+        send_move(motor, direction);
 
         if (check_switch(motor->mask) == 1) {
+            // move off limit switch
+            while (check_switch(motor->mask) == 1) {
+                send_move(motor, direction ? 0 : 1);
+
+                systick_delay_blocking(MOTOR_MAX_DELAY);
+            }
+
             return -1;
         }
 
         steps--;
-        systick_delay_blocking(50);
+        systick_delay_blocking(delay);
+
+        if (delay > MOTOR_MIN_DELAY) {
+            delay = delay <= MOTOR_RAMP ? MOTOR_MIN_DELAY : delay - MOTOR_RAMP;
+        }
     }
 
-    return 0;
+    return steps;
 }
 
-int movex(int steps) {
-    uint8_t direction = 1;
-    if (steps < 0) {
-        direction = 0;
-    }
 
-    return move(&motor_x, ABS(steps), direction);
+
+int movex(int steps) {
+    return move(&motor_x, steps);
 }
 
 int movey(int steps) {
-    uint8_t direction = 1;
-    if (steps < 0) {
-        direction = 0;
-    }
-
-    return move(&motor_y, ABS(steps), direction);
+    return move(&motor_y, steps);
 }
 
-int home(uint8_t *steps, uint8_t mask) {
-    int i = 0;
-    int j = 0;
-    while (1) {
-        i2c_send_data(MOTORS_XY_LATCH_ADDRESS, steps + i, 1);
-        // i2c_send_data(MOTORS_XY_LATCH_ADDRESS, steps + (i % 4), 1);
-
-        if (check_switch(mask)) {
-            break;
-        }
-
-        // i++;
-        i = (i + 1) % 4;
-        j++;
-        systick_delay_blocking(MOTOR_DELAY);
-    }
-
-    return j;
+int home(Motor_t *motor) {
+    return 1000 - move(motor, -1000);
 }
 
 int home_x() {
-    uint8_t data[] = MOTOR_STEPX_REVERSE;
-    return home(data, SWITCH_X_MASK);
+    return home(&motor_x);
 }
 
 int home_y() {
-    uint8_t data[] = MOTOR_STEPY_REVERSE;
-    return home(data, SWITCH_Y_MASK);
+    return home(&motor_y);
 }

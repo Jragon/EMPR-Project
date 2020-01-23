@@ -1,6 +1,10 @@
 #pragma once
 
-#define MOTOR_DELAY 50
+#include <lpc_types.h>
+
+#define MOTOR_MIN_DELAY 3
+#define MOTOR_MAX_DELAY 40
+#define MOTOR_RAMP 12
 
 #define MOTORS_XY_LATCH_ADDRESS 0x3E
 
@@ -33,9 +37,10 @@ typedef struct Motor_t {
 
 void setup_switches();
 int check_switch(uint8_t mask);
-int home(uint8_t *steps, uint8_t mask);
+int home(Motor_t *motor);
 int home_x();
 int home_y();
-int move(Motor_t *motor, unsigned int steps, uint8_t direction);
+void send_move(Motor_t *motor, uint8_t direction);
+int move(Motor_t *motor, int steps);
 int movex(int steps);
 int movey(int steps);

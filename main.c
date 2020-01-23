@@ -15,18 +15,14 @@ int main() {
     serial_printf("hello\r\n");
     setup_switches();
 
-    // int xsteps = home_x();
-    // int ysteps = home_y();
+    int xsteps = 1000 - movex(-1000);
+    int ysteps = 1000 - movey(-1000);
 
-    // serial_printf("home steps x: %d\r\n", xsteps);
-    // serial_printf("home steps y: %d\r\n", ysteps);
+    serial_printf("home steps x: %d\r\n", xsteps);
+    serial_printf("home steps y: %d\r\n", ysteps);
 
-    movex(100);
-    movex(-100);
-    movey(100);
-    movey(-100);
-
-    serial_printf("moved back\r\n");
+    movex(xsteps);
+    movey(ysteps);
 
     return 0;
 }

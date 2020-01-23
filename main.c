@@ -20,16 +20,26 @@ int main() {
     };
 
     grid_home(&grid);
-    grid_move_to_point(&grid, 950, 950);
+    grid_move_to_point(&grid, 900, 0);
+    systick_delay_blocking(500);
+
     while(1) {
-        grid_move_to_point(&grid, 100, 100);
-        systick_delay_blocking(100);
-        grid_move_to_point(&grid, 300, 0);
-        systick_delay_blocking(100);
-        grid_move_to_point(&grid, 0, 300);
-        systick_delay_blocking(100);
+        grid_move_to_point(&grid, 0, 0);
+        systick_delay_blocking(50);
+        grid_move_to_point(&grid, 900, 900);
+        systick_delay_blocking(50);
     }
+
+    // movex(900);
+
+    // raster
+    // while (grid.y < grid.max_y) {
+    //     grid_move_to_point(&grid, grid.max_x, grid.y);
+    //     systick_delay_blocking(100);
+    //     grid_move_to_point(&grid, 0, grid.y + 5);
+    // }
+
+
 
     return 0;
 }
-

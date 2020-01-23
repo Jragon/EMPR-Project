@@ -64,7 +64,8 @@ int move(Motor_t *motor, int steps) {
     while (steps > 0) {
         send_move(motor, direction);
 
-        if (check_switch(motor->mask) == 1) {
+        // check switch only if it's going towards the switch
+        if (direction == 0 && check_switch(motor->mask) == 1) {
             // move off limit switch
             while (check_switch(motor->mask) == 1) {
                 send_move(motor, direction ? 0 : 1);
@@ -86,7 +87,46 @@ int move(Motor_t *motor, int steps) {
     return steps;
 }
 
+void movexy_together(int xsteps, int ysteps) {
+    uint8_t direction_x = xsteps < 0 ? 0 : 1;
+    uint8_t direction_y = ysteps < 0 ? 0 : 1;
+    xsteps = ABS(xsteps);
+    ysteps = ABS(ysteps);
 
+    uint8_t delay = MOTOR_MAX_DELAY;
+
+    while (xsteps > 0 || ysteps > 0) {
+        if (xsteps > 0) {
+            if (direction_x == 1) {
+                motor_x.step = motor_x.step < 4 ? motor_x.step + 1 : 0;
+            } else {
+                motor_x.step = motor_x.step > 0 ? motor_x.step - 1 : 4;
+            }
+
+            xsteps--;
+        }
+
+        if (ysteps > 0) {
+            if (direction_y == 1) {
+                motor_y.step = motor_y.step < 4 ? motor_y.step + 1 : 0;
+            } else {
+                motor_y.step = motor_y.step > 0 ? motor_y.step - 1 : 4;
+            }
+
+            ysteps--;
+        }
+
+        uint8_t data = motor_x.steps[motor_x.step] | motor_y.steps[motor_y.step];
+        i2c_send_data(motor_x.address, &data, 1);
+
+
+        systick_delay_blocking(delay);
+
+        if (delay > MOTOR_MIN_DELAY) {
+            delay = delay <= MOTOR_RAMP ? MOTOR_MIN_DELAY : delay - MOTOR_RAMP;
+        }
+    }
+}
 
 int movex(int steps) {
     return move(&motor_x, steps);

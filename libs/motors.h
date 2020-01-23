@@ -2,9 +2,9 @@
 
 #include <lpc_types.h>
 
-#define MOTOR_MIN_DELAY 1
+#define MOTOR_MIN_DELAY 2
 #define MOTOR_MAX_DELAY 30
-#define MOTOR_RAMP 12
+#define MOTOR_RAMP 10
 
 #define MOTOR_XY_LATCH_ADDRESS 0x3E
 #define MOTOR_ZPEN_LATCH_ADDRESS 0x3F
@@ -45,3 +45,4 @@ void send_move(Motor_t *motor, uint8_t direction);
 int move(Motor_t *motor, int steps);
 int movex(int steps);
 int movey(int steps);
+void movexy_together(int xsteps, int ysteps);

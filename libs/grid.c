@@ -20,7 +20,7 @@ void grid_move_to_point(Grid_t *grid, uint32_t x, uint32_t y) {
     }
 
     if (y > grid->max_y) {
-        x = grid->max_y;
+        y = grid->max_y;
     }
 
     movexy_together(x - grid->x, y - grid->y);

@@ -27,12 +27,22 @@ void i2c_init() {
     initilized = TRUE;
 }
 
-void i2c_send_data(uint32_t address, uint8_t *data, uint32_t length) {
+void i2c_send_data(uint32_t address, uint8_t* data, uint32_t length) {
     I2C_M_SETUP_Type cfg;
     cfg.sl_addr7bit = address;
     cfg.rx_data = NULL;
     cfg.tx_data = data;
     cfg.tx_length = length;
+    cfg.retransmissions_max = 2;
+    I2C_MasterTransferData(I2C1DEV, &cfg, I2C_TRANSFER_POLLING);
+}
+
+void i2c_recieve_data(uint32_t address, uint8_t* data, uint32_t length) {
+    I2C_M_SETUP_Type cfg;
+    cfg.sl_addr7bit = address;
+    cfg.tx_data = NULL;
+    cfg.rx_data = data;
+    cfg.rx_length = length;
     cfg.retransmissions_max = 2;
     I2C_MasterTransferData(I2C1DEV, &cfg, I2C_TRANSFER_POLLING);
 }

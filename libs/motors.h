@@ -2,9 +2,9 @@
 
 #include <lpc_types.h>
 
-#define MOTOR_MIN_DELAY 2
+#define MOTOR_MIN_DELAY 5
 #define MOTOR_MAX_DELAY 30
-#define MOTOR_RAMP 10
+#define MOTOR_RAMP 2
 
 #define MOTOR_XY_LATCH_ADDRESS 0x3E
 #define MOTOR_ZPEN_LATCH_ADDRESS 0x3F

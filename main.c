@@ -1,3 +1,4 @@
+#include <math.h>
 #include <string.h>
 
 #include "libs/i2c.h"
@@ -20,14 +21,21 @@ int main() {
     };
 
     grid_home(&grid);
-    grid_move_to_point(&grid, 900, 0);
-    systick_delay_blocking(500);
+
+    systick_delay_blocking(100);
+
+    uint16_t offset_x = 400;
+    uint16_t offset_y = 400;
+    uint16_t radius = 200;
 
     while(1) {
-        grid_move_to_point(&grid, 0, 0);
-        systick_delay_blocking(50);
-        grid_move_to_point(&grid, 900, 900);
-        systick_delay_blocking(50);
+        for (int theta = 0; theta < 360; theta++) {
+            double rad = theta * 3.14/180;
+            int x = offset_x + (radius * sin(rad));
+            int y = offset_y + (radius * cos(rad));
+            grid_move_to_point(&grid, x, y);
+            // serial_printf("x: %3d, y: %3d\r\n", x, y);
+        }
     }
 
     // movex(900);

@@ -12,3 +12,5 @@ typedef struct Grid_t {
 
 void grid_home(Grid_t *grid);
 void grid_move_to_point(Grid_t *grid, uint32_t x, uint32_t y);
+void grid_x_steps(Grid_t *grid, int steps);
+void grid_y_steps(Grid_t *grid, int steps);

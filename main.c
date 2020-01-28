@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <lpc17xx_gpio.h>
+
 #include "libs/i2c.h"
 #include "libs/lcd.h"
 #include "libs/keypad.h"

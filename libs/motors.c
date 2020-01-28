@@ -21,6 +21,13 @@ static Motor_t motor_y = {
     0
 };
 
+static Motor_t motor_z = {
+    MOTOR_ZPEN_LATCH_ADDRESS,
+    MOTOR_STEPX,
+    SWITCH_Y_MASK,
+    0
+};
+
 void setup_switches() {
     uint8_t data = 0xF;
     i2c_send_data(SWITCH_ADDRESS, &data, 1);
@@ -148,6 +155,10 @@ int movex(int steps) {
 
 int movey(int steps) {
     return move(&motor_y, steps);
+}
+
+int movez(int steps) {
+    return move(&motor_z, steps);
 }
 
 int home(Motor_t *motor) {

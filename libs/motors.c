@@ -45,9 +45,9 @@ int check_switch(uint8_t mask) {
 
 void send_move(Motor_t *motor, uint8_t direction) {
     if (direction == 1) {
-        motor->step = motor->step < 4 ? motor->step + 1 : 0;
+        motor->step = motor->step < 3 ? motor->step + 1 : 0;
     } else {
-        motor->step = motor->step > 0 ? motor->step - 1 : 4;
+        motor->step = motor->step > 0 ? motor->step - 1 : 3;
     }
     i2c_send_data(motor->address, motor->steps + motor->step, 1);
 }
@@ -100,12 +100,13 @@ void movexy_together(int xsteps, int ysteps) {
     uint8_t delay = MOTOR_MAX_DELAY;
 
     while (xsteps > 0 || ysteps > 0) {
+        // serial_printf("xsteps %d, ysteps %d, motorx_step %d, motory_step %d\r\n", xsteps, ysteps, motor_x.step, motor_y.step);
         uint8_t x = 0;
         if (xsteps > 0) {
             if (direction_x == 1) {
-                motor_x.step = motor_x.step < 4 ? motor_x.step + 1 : 0;
+                motor_x.step = motor_x.step < 3 ? motor_x.step + 1 : 0;
             } else {
-                motor_x.step = motor_x.step > 0 ? motor_x.step - 1 : 4;
+                motor_x.step = motor_x.step > 0 ? motor_x.step - 1 : 3;
             }
 
             xsteps--;
@@ -115,9 +116,9 @@ void movexy_together(int xsteps, int ysteps) {
         uint8_t y = 0;
         if (ysteps > 0) {
             if (direction_y == 1) {
-                motor_y.step = motor_y.step < 4 ? motor_y.step + 1 : 0;
+                motor_y.step = motor_y.step < 3 ? motor_y.step + 1 : 0;
             } else {
-                motor_y.step = motor_y.step > 0 ? motor_y.step - 1 : 4;
+                motor_y.step = motor_y.step > 0 ? motor_y.step - 1 : 3;
             }
 
             ysteps--;
@@ -125,6 +126,7 @@ void movexy_together(int xsteps, int ysteps) {
         }
 
         uint8_t data = x | y;
+        // serial_printf("xstep %d, ystep %d, data: 0x%x \r\n", motor_x.step, motor_y.step, data);
         i2c_send_data(motor_x.address, &data, 1);
 
         systick_delay_blocking(delay);

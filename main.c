@@ -17,11 +17,12 @@ int main() {
     serial_printf("hello\r\n");
 
     Grid_t grid = {
-        950, 950, 10, 260, 0, 0
+        700, 700, 10, 260, 0, 0
     };
 
     
     grid_home(&grid);
+    grid_move_to_point(&grid, 700, 700);
 
     systick_delay_blocking(100);
 

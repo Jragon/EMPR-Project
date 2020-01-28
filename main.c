@@ -20,6 +20,7 @@ int main() {
         950, 950, 10, 260, 0, 0
     };
 
+    
     grid_home(&grid);
 
     systick_delay_blocking(100);

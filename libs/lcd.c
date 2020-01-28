@@ -107,7 +107,7 @@ uint8_t lcd_char_map(uint8_t index) {
         ['i'] = 0xE9,       ['j'] = 0xEA, ['k'] = 0xEB,  ['l'] = 0xEC, ['m'] = 0xED,
         ['n'] = 0xEE,       ['o'] = 0xEF, ['p'] = 0xF0,  ['q'] = 0xF1, ['r'] = 0xF2,
         ['s'] = 0xF3,       ['t'] = 0xF4, ['u'] = 0xF5,  ['v'] = 0xF6, ['w'] = 0xF7,
-        ['x'] = 0xF8,       ['y'] = 0xF9, ['z'] = 0xFA
+        ['x'] = 0xF8,       ['y'] = 0xF9, ['z'] = 0xFA,  ['^'] = 0x12, ['}'] = 0x30
     };
     return LCD_CHARSET[index <= 128 ? index : 0];
 }

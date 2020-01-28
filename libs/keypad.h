@@ -16,6 +16,7 @@ char keypad_read();
 
 /**
     @brief sends 0xFF to keypad pcf controller so that it can be used for interupts
+    This must be run every time
 
 */
 void keypad_set_as_inputs();

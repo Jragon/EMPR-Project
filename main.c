@@ -34,12 +34,13 @@ volatile uint8_t read = 0;
 void EINT3_IRQHandler() {
     if (GPIO_GetIntStatus(KEYPAD_INT_PORT, KEYPAD_INT_PIN, KEYPAD_INT_EDGE)) {
         GPIO_ClearInt(KEYPAD_INT_PORT, 1 << KEYPAD_INT_PIN);
-        serial_printf("keypad int\r\n");
+        serial_printf("[Menu]: keypad int\r\n");
         keypad_pressed_flag = 1;
     }
 }
 
 int main() {
+    extern int8_t menu_index;
     serial_init();
     i2c_init();
     lcd_init();
@@ -49,11 +50,11 @@ int main() {
     GPIO_IntCmd(0, 1 << 23, 1);
     NVIC_EnableIRQ(EINT3_IRQn);
     keypad_set_as_inputs();
-    menu_add_option("Opt1", 0);
-    menu_add_option("Opt2", 1);
-    menu_add_option("Opt3", 2);
-    menu_add_option("Opt4", 3);
-    menu_add_option("Opt5", 4);
+    menu_add_option("Opt1", 0, NULL);
+    menu_add_option("Opt2", 1, NULL);
+    menu_add_option("Opt3", 2, NULL);
+    menu_add_option("Opt4", 3, NULL);
+    menu_add_option("Opt5", 4, NULL);
     menu_draw(0);
     keypad_pressed_flag = 0;
     systick_delay_flag_init(5);
@@ -64,6 +65,9 @@ int main() {
 
         systick_delay_blocking(25);
     }
+
+            case '#':
+                menu_run_callback(menu_index);
 
             default:
                 break;

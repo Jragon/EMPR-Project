@@ -32,6 +32,7 @@ void grid_x_steps(Grid_t *grid, int steps) {
     grid->x += steps;
     movex(steps);
 }
+
 void grid_y_steps(Grid_t *grid, int steps) {
     grid->y += steps;
     movey(steps);

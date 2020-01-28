@@ -36,8 +36,8 @@ volatile uint8_t read = 0;
 void EINT3_IRQHandler() {
     if (GPIO_GetIntStatus(KEYPAD_INT_PORT, KEYPAD_INT_PIN, KEYPAD_INT_EDGE)) {
         GPIO_ClearInt(KEYPAD_INT_PORT, 1 << KEYPAD_INT_PIN);
-        serial_printf("[Menu]: keypad int\r\n");
-        keypad_pressed_flag = 1;
+        // serial_printf("keypad int\r\n");
+        keypad_set_flag();
     }
 }
 
@@ -48,18 +48,19 @@ int main() {
     lcd_init();
     menu_init();
     systick_init();
-    serial_printf("hello\r\n");
+    sensor_enable();
+
     GPIO_IntCmd(0, 1 << 23, 1);
     NVIC_EnableIRQ(EINT3_IRQn);
     keypad_set_as_inputs();
-    menu_add_option("Opt1", 0, NULL);
-    menu_add_option("Opt2", 1, NULL);
-    menu_add_option("Opt3", 2, NULL);
-    menu_add_option("Opt4", 3, NULL);
-    menu_add_option("Opt5", 4, NULL);
+
+
+    serial_printf("hello\r\n");
+
+    menu_add_option("A3: man move", 0, a3_manual_move);
+    menu_add_option("B1: CRGB move", 1, b1_xyz_move_rgb);
+
     menu_draw(0);
-    keypad_pressed_flag = 0;
-    systick_delay_flag_init(5);
 
     while(1) {
         sensor_read_all_colours(colours);
@@ -77,6 +78,6 @@ int main() {
 
         keypad_set_as_inputs();
         systick_delay_flag_reset();
-        keypad_pressed_flag = 0;
+        keypad_reset_flag();
     }
 }

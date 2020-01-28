@@ -40,7 +40,9 @@ LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
 # Target locations
 LIBSC		= libs/*.c
 LIBS		= $(shell echo $(LIBSC) | sed s/\\.c/\\.o/g)
-OBJ			= $(LIBS) main.o
+TASKSC      = tasks/*.c
+TASKS		= $(shell echo $(TASKSC) | sed s/\\.c/\\.o/g)
+OBJ			= $(LIBS) $(TASKS) main.o
 
 # Targets
 all:	main

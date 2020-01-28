@@ -1,0 +1,1 @@
+void a3_manual_move();

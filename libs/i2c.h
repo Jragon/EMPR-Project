@@ -17,6 +17,8 @@ void i2c_init();
 /**
     @brief sends data with no recieve value
 */
-void i2c_send_data(uint32_t address, uint8_t* data, uint32_t length);
+void i2c_send_data(uint8_t address, uint8_t* data, uint32_t length);
 
-void i2c_recieve_data(uint32_t address, uint8_t* data, uint32_t length);
+void i2c_recieve_data(uint8_t address, uint8_t* data, uint32_t length);
+
+void i2c_duplex(uint8_t address, uint8_t* tx, uint32_t tx_len, uint8_t* rx, uint32_t rx_len);

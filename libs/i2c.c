@@ -27,7 +27,7 @@ void i2c_init() {
     initilized = TRUE;
 }
 
-void i2c_send_data(uint32_t address, uint8_t* data, uint32_t length) {
+void i2c_send_data(uint8_t address, uint8_t* data, uint32_t length) {
     I2C_M_SETUP_Type cfg;
     cfg.sl_addr7bit = address;
     cfg.rx_data = NULL;
@@ -37,12 +37,23 @@ void i2c_send_data(uint32_t address, uint8_t* data, uint32_t length) {
     I2C_MasterTransferData(I2C1DEV, &cfg, I2C_TRANSFER_POLLING);
 }
 
-void i2c_recieve_data(uint32_t address, uint8_t* data, uint32_t length) {
+void i2c_recieve_data(uint8_t address, uint8_t* data, uint32_t length) {
     I2C_M_SETUP_Type cfg;
     cfg.sl_addr7bit = address;
     cfg.tx_data = NULL;
     cfg.rx_data = data;
     cfg.rx_length = length;
+    cfg.retransmissions_max = 2;
+    I2C_MasterTransferData(I2C1DEV, &cfg, I2C_TRANSFER_POLLING);
+}
+
+void i2c_duplex(uint8_t address, uint8_t* tx, uint32_t tx_len, uint8_t* rx, uint32_t rx_len) {
+    I2C_M_SETUP_Type cfg;
+    cfg.sl_addr7bit = address;
+    cfg.tx_data = tx;
+    cfg.tx_length = tx_len;
+    cfg.rx_data = rx;
+    cfg.rx_length = rx_len;
     cfg.retransmissions_max = 2;
     I2C_MasterTransferData(I2C1DEV, &cfg, I2C_TRANSFER_POLLING);
 }

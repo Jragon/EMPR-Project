@@ -3,17 +3,19 @@
 #include "grid.h"
 #include "motors.h"
 
-static Grid_t grid = {GRID_MAX_X, GRID_MAX_Y, GRID_X_OFFSET, GRID_Y_OFFSET, 0, 0};
+static Grid_t grid = {GRID_MAX_X, GRID_MAX_Y, GRID_X_OFFSET, GRID_Y_OFFSET, 0, 0, 0};
 
 void grid_home() {
     home_x();
     home_y();
+    home_z();
 
     movex(grid.x_offset);
     movey(grid.y_offset);
 
     grid.x = 0;
     grid.y = 0;
+    grid.z = 0;
 }
 
 void grid_move_to_point(uint32_t x, uint32_t y) {
@@ -40,10 +42,19 @@ void grid_y_steps(int steps) {
     movey(steps);
 }
 
+void grid_z_steps(int steps) {
+    grid.z += steps;
+    movez(steps);
+}
+
 uint32_t grid_get_x() {
     return grid.x;
 }
 
 uint32_t grid_get_y() {
     return grid.y;
+}
+
+uint32_t grid_get_z() {
+    return grid.z;
 }

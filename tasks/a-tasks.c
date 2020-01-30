@@ -40,10 +40,10 @@ void a3_manual_move() {
                 grid_y_steps(-8);
                 break;
             case '3':
-                movez(5);
+                grid_z_steps(8);
                 break;
             case '6':
-                movez(-5);
+                grid_z_steps(-8);
                 break;
             default:
                 continue;
@@ -51,6 +51,6 @@ void a3_manual_move() {
         }
 
         systick_delay_flag_reset();
-        lcd_printf(0x40, "(%3d, %3d, %3d)", grid_get_x(), grid_get_y(), 0);
+        lcd_printf(0x40, "(%3d, %3d, %3d)", grid_get_x(), grid_get_y(), grid_get_z());
     }
 }

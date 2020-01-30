@@ -1,32 +1,15 @@
-#include <lpc_types.h>
 #include <lpc17xx_i2c.h>
+#include <lpc_types.h>
 
-#include "motors.h"
 #include "i2c.h"
-#include "systick_delay.h"
+#include "motors.h"
 #include "serial.h"
+#include "systick_delay.h"
 #include "util_macros.h"
 
-static Motor_t motor_x = {
-    MOTOR_XY_LATCH_ADDRESS,
-    MOTOR_STEPX,
-    SWITCH_X_MASK,
-    0
-};
-
-static Motor_t motor_y = {
-    MOTOR_XY_LATCH_ADDRESS,
-    MOTOR_STEPY,
-    SWITCH_Y_MASK,
-    0
-};
-
-static Motor_t motor_z = {
-    MOTOR_ZPEN_LATCH_ADDRESS,
-    MOTOR_STEPX,
-    SWITCH_Y_MASK,
-    0
-};
+static Motor_t motor_x = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPX, SWITCH_X_MASK, 0, 1};
+static Motor_t motor_y = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPY, SWITCH_Y_MASK, 0, 1};
+static Motor_t motor_z = {MOTOR_ZPEN_LATCH_ADDRESS, MOTOR_STEPZ, SWITCH_Z_MASK, 0, 10};
 
 void setup_switches() {
     uint8_t data = 0xF;
@@ -65,7 +48,7 @@ int move(Motor_t *motor, int steps) {
         direction = 0;
     }
 
-    steps = ABS(steps);
+    steps = ABS(steps) * motor->step_scaler;
     uint8_t delay = MOTOR_MAX_DELAY;
 
     while (steps > 0) {
@@ -107,7 +90,8 @@ void movexy_together(int xsteps, int ysteps) {
     uint8_t delay = MOTOR_MAX_DELAY;
 
     while (xsteps > 0 || ysteps > 0) {
-        // serial_printf("xsteps %d, ysteps %d, motorx_step %d, motory_step %d\r\n", xsteps, ysteps, motor_x.step, motor_y.step);
+        // serial_printf("xsteps %d, ysteps %d, motorx_step %d, motory_step %d\r\n",
+        // xsteps, ysteps, motor_x.step, motor_y.step);
         uint8_t x = 0;
         if (xsteps > 0) {
             if (direction_x == 1) {
@@ -133,7 +117,8 @@ void movexy_together(int xsteps, int ysteps) {
         }
 
         uint8_t data = x | y;
-        // serial_printf("xstep %d, ystep %d, data: 0x%x \r\n", motor_x.step, motor_y.step, data);
+        // serial_printf("xstep %d, ystep %d, data: 0x%x \r\n", motor_x.step,
+        // motor_y.step, data);
         i2c_send_data(motor_x.address, &data, 1);
 
         systick_delay_blocking(delay);
@@ -141,9 +126,9 @@ void movexy_together(int xsteps, int ysteps) {
         if (delay > MOTOR_MIN_DELAY) {
             delay = delay <= MOTOR_RAMP ? MOTOR_MIN_DELAY : delay - MOTOR_RAMP;
         }
-        // serial_printf("delay: %2d; x_steps: %3d; y_steps: %3d\r\n", delay, xsteps, ysteps);
+        // serial_printf("delay: %2d; x_steps: %3d; y_steps: %3d\r\n", delay, xsteps,
+        // ysteps);
     }
-
 
     uint8_t off = 0x00;
     i2c_send_data(motor_x.address, &off, 1);
@@ -162,7 +147,7 @@ int movez(int steps) {
 }
 
 int home(Motor_t *motor) {
-    return 1500 - move(motor, -1500);
+    return 10000 - move(motor, -10000);
 }
 
 int home_x() {
@@ -171,4 +156,8 @@ int home_x() {
 
 int home_y() {
     return home(&motor_y);
+}
+
+int home_z() {
+    return home(&motor_z);
 }

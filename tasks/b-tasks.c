@@ -24,10 +24,10 @@ uint8_t _manmove() {
             grid_y_steps(-8);
             break;
         case '3':
-            movez(5);
+            grid_z_steps(8);
             break;
         case '6':
-            movez(-5);
+            grid_z_steps(-8);
             break;
         default:
             return -1;
@@ -41,7 +41,7 @@ void b1_xyz_move_rgb() {
     serial_printf("b1_xyz_move_rgb\r\n");
     lcd_clear_display();
 
-    lcd_printf(0x00, "homing");
+    lcd_printf(0x00, "homing...");
 
     // perhaps make grid a singleton
     grid_home();

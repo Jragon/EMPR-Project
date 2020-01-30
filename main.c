@@ -6,7 +6,6 @@
 #include <lpc17xx_gpio.h>
 
 #include "libs/i2c.h"
-#include "libs/lcd.h"
 #include "libs/keypad.h"
 #include "libs/serial.h"
 #include "libs/pinsel.h"
@@ -53,7 +52,6 @@ int main() {
     GPIO_IntCmd(0, 1 << 23, 1);
     NVIC_EnableIRQ(EINT3_IRQn);
     keypad_set_as_inputs();
-
 
     serial_printf("hello\r\n");
 

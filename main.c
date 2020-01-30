@@ -55,8 +55,11 @@ int main() {
 
     serial_printf("hello\r\n");
 
-    menu_add_option("A3: man move", 0, a3_manual_move);
-    menu_add_option("B1: CRGB move", 1, b1_xyz_move_rgb);
+    // a2_edge_detection();
+
+    menu_add_option("A2: edge detec", 0, a2_edge_detection);
+    menu_add_option("A3: man move", 1, a3_manual_move);
+    menu_add_option("B1: CRGB move", 2, b1_xyz_move_rgb);
 
     menu_draw(0);
 

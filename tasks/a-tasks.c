@@ -1,5 +1,7 @@
 #include <lpc_types.h>
 
+#include <math.h>
+
 #include "../libs/grid.h"
 #include "../libs/keypad.h"
 #include "../libs/lcd.h"
@@ -7,6 +9,33 @@
 #include "../libs/sensor.h"
 #include "../libs/serial.h"
 #include "../libs/systick_delay.h"
+
+void task_A1a() {
+    serial_printf("[Task]: Drawing a circle\r\n");
+    grid_home();
+    serial_printf("Homed\r\n");
+    uint16_t offset_x = 400;
+    uint16_t offset_y = 400;
+    uint16_t radius = 200;
+
+    for (int theta = 0; theta < 360; theta++) {
+        double rad = theta * 3.14 / 180;
+        int x = offset_x + (radius * sin(rad));
+        int y = offset_y + (radius * cos(rad));
+        grid_move_to_point(x, y);
+        // serial_printf("x: %3d, y: %3d\r\n", x, y);
+    }
+}
+
+void task_A1b() {
+    serial_printf("[Task]: Drawing a square\r\n");
+    grid_home();
+    grid_move_to_point(50, 50);
+    grid_move_to_point(650, 650);
+    grid_move_to_point(50, 650);
+    grid_move_to_point(650, 50);
+    grid_move_to_point(50, 50);
+}
 
 void a2_edge_detection() {
     serial_printf("A2 Edge Detection \r\n");

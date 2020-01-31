@@ -90,8 +90,11 @@ void movexy_together(int xsteps, int ysteps) {
     uint8_t delay = MOTOR_MAX_DELAY;
 
     while (xsteps > 0 || ysteps > 0) {
-        // serial_printf("xsteps %d, ysteps %d, motorx_step %d, motory_step %d\r\n",
-        // xsteps, ysteps, motor_x.step, motor_y.step);
+        /*
+         *serial_printf("xsteps %d, ysteps %d, motorx_step %d, motory_step %d\r\n",
+         *xsteps, ysteps, motor_x.step, motor_y.step);
+         */
+
         uint8_t x = 0;
         if (xsteps > 0) {
             if (direction_x == 1) {

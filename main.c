@@ -53,13 +53,13 @@ int main() {
     NVIC_EnableIRQ(EINT3_IRQn);
     keypad_set_as_inputs();
 
-    serial_printf("hello\r\n");
+    serial_printf("\r\nhello\r\n");
 
-    // a2_edge_detection();
-
-    menu_add_option("A2: edge detec", 0, a2_edge_detection);
-    menu_add_option("A3: man move", 1, a3_manual_move);
-    menu_add_option("B1: CRGB move", 2, b1_xyz_move_rgb);
+    menu_add_option("A1a: Circle", 0, task_A1a);
+    menu_add_option("A1b: Square", 1, task_A1b);
+    menu_add_option("A2:  edge detec", 2, a2_edge_detection);
+    menu_add_option("A3:  man move", 3, a3_manual_move);
+    menu_add_option("B1:  CRGB move", 4, b1_xyz_move_rgb);
 
     menu_draw(0);
 
@@ -71,6 +71,7 @@ int main() {
     }
 
             case '#':
+                serial_printf("[Menu]: Called menu item %i\r\n", menu_index);
                 menu_run_callback(menu_index);
 
             default:

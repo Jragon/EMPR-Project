@@ -31,8 +31,8 @@ void task_A1b() {
     serial_printf("[Task]: Drawing a square\r\n");
     grid_home();
     grid_move_to_point(50, 50);
-    grid_move_to_point(650, 650);
     grid_move_to_point(50, 650);
+    grid_move_to_point(650, 650);
     grid_move_to_point(650, 50);
     grid_move_to_point(50, 50);
 }

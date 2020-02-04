@@ -59,16 +59,18 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
-IncludeBlocks:   Preserve
+IncludeBlocks:   Regroup
 IncludeCategories: 
-  - Regex:           '^<ext/.*\.h>'
-    Priority:        2
-  - Regex:           '^<.*\.h>'
+  - Regex:           '^<lpc_.*>'
     Priority:        1
-  - Regex:           '^<.*'
+  - Regex:           '^<lpc17.*>'
     Priority:        2
-  - Regex:           '.*'
+  - Regex:           '^<.*>'
     Priority:        3
+  - Regex:           '^"(.*\/)+.*"'
+    Priority:        4
+  - Regex:           '\".*\"'
+    Priority:        5
 IncludeIsMainRegex: '([-_](test|unittest))?$'
 IndentCaseLabels: true
 IndentPPDirectives: None

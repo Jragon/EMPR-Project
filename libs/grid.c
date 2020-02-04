@@ -33,18 +33,30 @@ void grid_move_to_point(uint16_t x, uint16_t y) {
 }
 
 void grid_x_steps(int steps) {
-    if (movex(steps) != -1)
+    motor_move_blocking(steps, 0, 0);
+    if (motor_get_lims() & X_LIM) {
+        grid.x = 0;
+    } else {
         grid.x += steps;
+    }
 }
 
 void grid_y_steps(int steps) {
-    if (movey(steps) != -1)
+    motor_move_blocking(0, steps, 0);
+    if (motor_get_lims() & Y_LIM) {
+        grid.y = 0;
+    } else {
         grid.y += steps;
+    }
 }
 
 void grid_z_steps(int steps) {
-    if (movez(steps < 0 ? steps * 8 : steps) != -1)
+    motor_move_blocking(0, 0, steps);
+    if (motor_get_lims() & Z_LIM) {
+        grid.z = 0;
+    } else {
         grid.z += steps;
+    }
 }
 
 uint32_t grid_get_x() {

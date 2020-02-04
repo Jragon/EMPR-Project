@@ -65,9 +65,9 @@ void motor_wake() {
 void motor_sleep() {
     LPC_TIM1->TCR = 0;
 
-    uint8_t off = 0;
-    i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &off, 1);
-    i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &off, 1);
+    // uint8_t off = 0;
+    // i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &off, 1);
+    // i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &off, 1);
 }
 
 uint8_t motor_get_move(Motor_t *motor, uint8_t direction) {

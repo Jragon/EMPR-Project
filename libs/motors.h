@@ -41,6 +41,16 @@ typedef struct Motor_t {
     uint8_t step_scaler;
 } Motor_t;
 
+/**
+ * N.B. Motors use timer 1
+ */
+void motor_init();
+uint8_t motor_moving();
+void motor_wake();
+void motor_sleep();
+uint8_t motor_get_move(Motor_t *motor, uint8_t direction);
+void motor_set(int x_steps, int y_steps, int z_steps);
+
 void setup_switches();
 int check_switch(uint8_t mask);
 int home(Motor_t *motor);

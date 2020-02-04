@@ -1,15 +1,130 @@
 #include <lpc17xx_i2c.h>
+#include <lpc17xx_timer.h>
 #include <lpc_types.h>
 
 #include "i2c.h"
 #include "motors.h"
 #include "serial.h"
 #include "systick_delay.h"
+#include "timer.h"
 #include "util_macros.h"
 
 static Motor_t motor_x = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPX, SWITCH_X_MASK, 0, 1};
 static Motor_t motor_y = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPY, SWITCH_Y_MASK, 0, 1};
 static Motor_t motor_z = {MOTOR_ZPEN_LATCH_ADDRESS, MOTOR_STEPZ, SWITCH_Z_MASK, 0, 10};
+
+typedef struct {
+    Motor_t *m_x, *m_y, *m_z;
+    uint32_t tick_size, last_tick;
+    uint16_t x_steps, y_steps, z_steps;
+    uint8_t x_dir, y_dir, z_dir;
+} Motors_t;
+
+static volatile Motors_t motors = {
+  .m_x = &motor_x,
+  .m_y = &motor_y,
+  .m_z = &motor_z,
+  .tick_size = 5,
+};
+
+void motor_init() {
+    timer_init();
+
+    LPC_TIM1->TCR = 0;   // start disabled
+    LPC_TIM1->CTCR = 0;  // timer mode
+    LPC_TIM1->PR = 0;    // no prescale
+
+    // mcr what to do when mr0 fires
+    LPC_TIM1->MCR = 0b011;  // MR0: !stop, reset, interrupt
+
+    // disable capture and external match
+    LPC_TIM1->CCR = 0;
+    LPC_TIM1->EMR = 0;
+    NVIC_EnableIRQ(TIMER1_IRQn);  // Enable Stepper Driver Interrupt
+}
+
+uint8_t motor_moving() {
+    return motors.x_steps != 0 || motors.y_steps != 0 || motors.z_steps != 0;
+}
+
+void motor_wake() {
+    // reset the timer
+    LPC_TIM1->TCR = 0b10;
+    // generate interupt quickly
+    // ie after 4000 ticks
+    LPC_TIM1->MR0 = 4000;
+    // enable timer
+    LPC_TIM1->TCR = 0b01;
+}
+
+void motor_sleep() {
+    LPC_TIM1->TCR = 0;
+
+    uint8_t off = 0;
+    i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &off, 1);
+    i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &off, 1);
+}
+
+uint8_t motor_get_move(Motor_t *motor, uint8_t direction) {
+    if (direction == 1) {
+        motor->step = motor->step < 3 ? motor->step + 1 : 0;
+    } else {
+        motor->step = motor->step > 0 ? motor->step - 1 : 3;
+    }
+
+    return motor->steps[motor->step];
+}
+
+void motor_set(int x_steps, int y_steps, int z_steps) {
+    motors.x_steps = ABS(x_steps);
+    motors.y_steps = ABS(y_steps);
+    motors.z_steps = ABS(z_steps);
+
+    motors.x_dir = x_steps < 0 ? 1 : 0;
+    motors.y_dir = y_steps < 0 ? 1 : 0;
+    motors.z_dir = z_steps < 0 ? 1 : 0;
+}
+
+void TIMER1_IRQHandler() {
+    // uint32_t start = timer_millis();
+
+    LPC_TIM1->IR = LPC_TIM1->IR;
+
+    if (timer_millis() - motors.last_tick < motors.tick_size) {
+        return;
+    }
+    motors.last_tick = timer_millis();
+
+    uint8_t x = 0;
+    if (motors.x_steps > 0) {
+        x = motor_get_move(motors.m_x, motors.x_dir);
+        motors.x_steps -= 1;
+    }
+
+    uint8_t y = 0;
+    if (motors.y_steps > 0) {
+        y = motor_get_move(motors.m_y, motors.y_dir);
+        motors.y_steps -= 1;
+    }
+
+    uint8_t xy = x | y;
+
+    uint8_t z = 0;
+    if (motors.z_steps > 0) {
+        z = motor_get_move(motors.m_z, motors.z_dir);
+        i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &z, 1);
+        motors.z_steps -= 1;
+    }
+
+    if (xy != 0) {
+        i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &xy, 1);
+    } else if (z == 0) {
+        // ie no steps left running
+        motor_sleep();
+    }
+
+    // serial_printf("time: %d\r\n", timer_millis() - start);
+}
 
 void setup_switches() {
     uint8_t data = 0xF;

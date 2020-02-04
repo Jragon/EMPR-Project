@@ -18,6 +18,7 @@ typedef struct {
     uint32_t tick_size, last_tick;
     uint16_t x_steps, y_steps, z_steps;
     uint8_t x_dir, y_dir, z_dir;
+    LimitSwitches_t lims;
 } Motors_t;
 
 static volatile Motors_t motors = {
@@ -29,6 +30,10 @@ static volatile Motors_t motors = {
 
 void motor_init() {
     timer_init();
+
+    // set up switches
+    uint8_t data = 0xFF;
+    i2c_send_data(SWITCH_ADDRESS, &data, 1);
 
     LPC_TIM1->TCR = 0;   // start disabled
     LPC_TIM1->CTCR = 0;  // timer mode
@@ -43,7 +48,7 @@ void motor_init() {
     NVIC_EnableIRQ(TIMER1_IRQn);  // Enable Stepper Driver Interrupt
 }
 
-uint8_t motor_moving() {
+uint8_t motor_running() {
     return motors.x_steps != 0 || motors.y_steps != 0 || motors.z_steps != 0;
 }
 
@@ -67,9 +72,9 @@ void motor_sleep() {
 
 uint8_t motor_get_move(Motor_t *motor, uint8_t direction) {
     if (direction == 1) {
-        motor->step = motor->step < 3 ? motor->step + 1 : 0;
-    } else {
         motor->step = motor->step > 0 ? motor->step - 1 : 3;
+    } else {
+        motor->step = motor->step < 3 ? motor->step + 1 : 0;
     }
 
     return motor->steps[motor->step];
@@ -85,6 +90,17 @@ void motor_set(int x_steps, int y_steps, int z_steps) {
     motors.z_dir = z_steps < 0 ? 1 : 0;
 }
 
+void motor_move_blocking(int x_steps, int y_steps, int z_steps) {
+    motor_set(x_steps, y_steps, z_steps);
+    motor_wake();
+    while (motor_running())
+        ;
+}
+
+LimitSwitches_t motor_get_lims() {
+    return motors.lims;
+}
+
 void TIMER1_IRQHandler() {
     // uint32_t start = timer_millis();
 
@@ -95,25 +111,41 @@ void TIMER1_IRQHandler() {
     }
     motors.last_tick = timer_millis();
 
+    uint8_t sw;
+    i2c_recieve_data(SWITCH_ADDRESS, &sw, 1);
+    motors.lims = (uint8_t)~sw;
+
     uint8_t x = 0;
     if (motors.x_steps > 0) {
-        x = motor_get_move(motors.m_x, motors.x_dir);
-        motors.x_steps -= 1;
+        if (motors.x_dir == 1 && motors.lims & X_LIM) {
+            motors.x_steps = 0;
+        } else {
+            x = motor_get_move(motors.m_x, motors.x_dir);
+            motors.x_steps -= 1;
+        }
     }
 
     uint8_t y = 0;
     if (motors.y_steps > 0) {
-        y = motor_get_move(motors.m_y, motors.y_dir);
-        motors.y_steps -= 1;
+        if (motors.y_dir == 1 && motors.lims & Y_LIM) {
+            motors.y_steps = 0;
+        } else {
+            y = motor_get_move(motors.m_y, motors.y_dir);
+            motors.y_steps -= 1;
+        }
     }
 
     uint8_t xy = x | y;
 
     uint8_t z = 0;
     if (motors.z_steps > 0) {
-        z = motor_get_move(motors.m_z, motors.z_dir);
-        i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &z, 1);
-        motors.z_steps -= 1;
+        if (motors.z_dir == 1 && motors.lims & Z_LIM) {
+            motors.z_steps = 0;
+        } else {
+            z = motor_get_move(motors.m_z, motors.z_dir);
+            i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &z, 1);
+            motors.z_steps -= 1;
+        }
     }
 
     if (xy != 0) {

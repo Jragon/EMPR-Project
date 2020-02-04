@@ -41,15 +41,24 @@ typedef struct Motor_t {
     uint8_t step_scaler;
 } Motor_t;
 
+typedef enum LimitSwitches_t {
+    X_LIM = SWITCH_X_MASK,
+    Y_LIM = SWITCH_Y_MASK,
+    Z_LIM = SWITCH_Z_MASK,
+    XYZ_LIM = 0b111
+} LimitSwitches_t;
+
 /**
  * N.B. Motors use timer 1
  */
 void motor_init();
-uint8_t motor_moving();
+uint8_t motor_running();
 void motor_wake();
 void motor_sleep();
 uint8_t motor_get_move(Motor_t *motor, uint8_t direction);
 void motor_set(int x_steps, int y_steps, int z_steps);
+LimitSwitches_t motor_get_lims();
+void motor_move_blocking(int x_steps, int y_steps, int z_steps);
 
 void setup_switches();
 int check_switch(uint8_t mask);

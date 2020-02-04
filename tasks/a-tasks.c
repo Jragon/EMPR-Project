@@ -10,7 +10,7 @@
 #include "../libs/serial.h"
 #include "../libs/systick_delay.h"
 
-void task_A1a() {
+void task_A1a_circle() {
     serial_printf("[Task]: Drawing a circle\r\n");
     grid_home();
     serial_printf("Homed\r\n");
@@ -27,7 +27,7 @@ void task_A1a() {
     }
 }
 
-void task_A1b() {
+void task_A1b_square() {
     serial_printf("[Task]: Drawing a square\r\n");
     grid_home();
     grid_move_to_point(50, 50);
@@ -37,28 +37,33 @@ void task_A1b() {
     grid_move_to_point(50, 50);
 }
 
-void a2_edge_detection() {
-    serial_printf("A2 Edge Detection \r\n");
+void task_A1c_z_axis() {
+    serial_printf("[Task]: Moving the Z axis\r\n");
+    grid_home();
+    grid_z_steps(50);
+    grid_z_steps(-50 * 8);
+    grid_z_steps(50);
+    grid_z_steps(-50 * 8);
+}
+
+void task_A2_edge_detection() {
+    serial_printf("[Task]: Edge Detection\r\n");
     lcd_clear_display();
-
     lcd_printf(0x00, "homing ...");
-
     home_x();
     home_y();
     // home_z();
-
     lcd_clear_display();
-
     uint16_t last_intensity = sensor_read_clear();
     uint16_t high_bound = 10000;
 
-    /* order:
-       scan y +ve;
-       scan x +ve;
-       scan y -ve;
-       scan x -ve -- to limit switches probably
+    /*  order:
+        scan y +ve;
+        scan x +ve;
+        scan y -ve;
+        scan x -ve -- to limit switches probably
 
-       probs do inside of the grid
+        probs do inside of the grid
     */
 
     while (last_intensity < high_bound) {
@@ -68,44 +73,51 @@ void a2_edge_detection() {
     }
 }
 
-void a3_manual_move() {
-    serial_printf("a3 manual move\r\n");
+void task_A3_manual_move() {
+    serial_printf("[Task]: Manual move mode\r\n");
     keypad_set_as_inputs();
     lcd_clear_display();
-
-    lcd_printf(0x00, "homing");
-
+    lcd_printf(0x00, "Homing");
     grid_home();
-
     lcd_printf(0x00, "Press 1-6");
     lcd_printf(0x40, "(%3d, %3d, %3d)", 0, 0, 0);
-
     systick_delay_flag_reset();
+
     while (1) {
         if (systick_flag() == 0) {
             continue;
         }
 
         char k = keypad_read();
+
         switch (k) {
             case '1':
                 grid_x_steps(8);
                 break;
+
             case '4':
                 grid_x_steps(-8);
                 break;
+
             case '2':
                 grid_y_steps(8);
                 break;
+
             case '5':
                 grid_y_steps(-8);
                 break;
+
             case '3':
                 grid_z_steps(8);
                 break;
+
             case '6':
                 grid_z_steps(-8);
                 break;
+
+            case '#':
+                return;
+
             default:
                 continue;
                 break;

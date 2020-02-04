@@ -9,10 +9,8 @@ void grid_home() {
     home_x();
     home_y();
     home_z();
-
     movex(grid.x_offset);
     movey(grid.y_offset);
-
     grid.x = 0;
     grid.y = 0;
     grid.z = 0;
@@ -33,18 +31,18 @@ void grid_move_to_point(uint32_t x, uint32_t y) {
 }
 
 void grid_x_steps(int steps) {
-    grid.x += steps;
-    movex(steps);
+    if (movex(steps) != -1)
+        grid.x += steps;
 }
 
 void grid_y_steps(int steps) {
-    grid.y += steps;
-    movey(steps);
+    if (movey(steps) != -1)
+        grid.y += steps;
 }
 
 void grid_z_steps(int steps) {
-    grid.z += steps;
-    movez(steps);
+    if (movez(steps < 0 ? steps * 8 : steps) != -1)
+        grid.z += steps;
 }
 
 uint32_t grid_get_x() {

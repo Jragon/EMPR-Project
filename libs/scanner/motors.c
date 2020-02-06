@@ -27,7 +27,7 @@ static volatile Motors_t motors = {
   .m_x = &motor_x,
   .m_y = &motor_y,
   .m_z = &motor_z,
-  .tick_size = 5,
+  .tick_size = 1500,  // ~1.5ms
 };
 
 void motor_init() {
@@ -37,12 +37,14 @@ void motor_init() {
     uint8_t data = 0xFF;
     i2c_send_data(SWITCH_ADDRESS, &data, 1);
 
-    LPC_TIM1->TCR = 0;   // start disabled
-    LPC_TIM1->CTCR = 0;  // timer mode
-    LPC_TIM1->PR = 0;    // no prescale
+    TIM_TIMERCFG_Type cfg;
+    cfg.PrescaleOption = TIM_PRESCALE_USVAL;
+    cfg.PrescaleValue = 1;
+    TIM_Init(LPC_TIM1, TIM_TIMER_MODE, &cfg);
 
     // mcr what to do when mr0 fires
     LPC_TIM1->MCR = 0b011;  // MR0: !stop, reset, interrupt
+    LPC_TIM1->MR0 = motors.tick_size;
 
     // disable capture and external match
     LPC_TIM1->CCR = 0;
@@ -57,9 +59,6 @@ uint8_t motor_running() {
 void motor_wake() {
     // reset the timer
     LPC_TIM1->TCR = 0b10;
-    // generate interupt quickly
-    // ie after 4000 ticks
-    LPC_TIM1->MR0 = 4000;
     // enable timer
     LPC_TIM1->TCR = 0b01;
 }
@@ -99,6 +98,13 @@ void motor_move_blocking(int x_steps, int y_steps, int z_steps) {
         ;
 }
 
+void motor_goto_lims() {
+    motor_set(-1000, -1000, -10000);
+    motor_wake();
+    while (motors.lims != XYZ_LIM && motor_running())
+        ;
+}
+
 LimitSwitches_t motor_get_lims() {
     return motors.lims;
 }
@@ -107,11 +113,6 @@ void TIMER1_IRQHandler() {
     // uint32_t start = timer_millis();
 
     LPC_TIM1->IR = LPC_TIM1->IR;
-
-    if (timer_millis() - motors.last_tick < motors.tick_size) {
-        return;
-    }
-    motors.last_tick = timer_millis();
 
     uint8_t sw;
     i2c_recieve_data(SWITCH_ADDRESS, &sw, 1);

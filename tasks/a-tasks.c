@@ -16,14 +16,16 @@ void task_A1a_circle() {
     serial_printf("Homed\r\n");
     uint16_t offset_x = 400;
     uint16_t offset_y = 400;
-    uint16_t radius = 200;
+    uint16_t radius = 300;
 
-    for (int theta = 0; theta < 360; theta++) {
-        double rad = theta * 3.14 / 180;
-        int x = offset_x + (radius * sin(rad));
-        int y = offset_y + (radius * cos(rad));
-        grid_move_to_point(x, y);
-        // serial_printf("x: %3d, y: %3d\r\n", x, y);
+    for (int i = 0; i < 3; i++) {
+        for (int theta = 0; theta < 360; theta++) {
+            double rad = theta * 3.14 / 180;
+            int x = offset_x + (radius * sin(rad));
+            int y = offset_y + (radius * cos(rad));
+            grid_move_to_point(x, y);
+            // serial_printf("x: %3d, y: %3d\r\n", x, y);
+        }
     }
 }
 

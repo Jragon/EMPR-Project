@@ -59,6 +59,7 @@ uint8_t motor_get_move(Motor_t *motor, uint8_t direction);
 void motor_set(int x_steps, int y_steps, int z_steps);
 LimitSwitches_t motor_get_lims();
 void motor_move_blocking(int x_steps, int y_steps, int z_steps);
+void motor_goto_lims();
 
 void setup_switches();
 int check_switch(uint8_t mask);

@@ -1,8 +1,10 @@
+#include "grid.h"
+
 #include <lpc_types.h>
 
-#include "grid.h"
+#include "../serial.h"
+
 #include "motors.h"
-#include "serial.h"
 
 static Grid_t grid = {GRID_MAX_X, GRID_MAX_Y, GRID_X_OFFSET, GRID_Y_OFFSET, 0, 0, 0};
 

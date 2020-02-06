@@ -1,10 +1,10 @@
 #include <lpc_types.h>
 
-#include "../libs/grid.h"
 #include "../libs/keypad.h"
 #include "../libs/lcd.h"
-#include "../libs/motors.h"
-#include "../libs/sensor.h"
+#include "../libs/scanner/grid.h"
+#include "../libs/scanner/motors.h"
+#include "../libs/scanner/sensor.h"
 #include "../libs/serial.h"
 #include "../libs/systick_delay.h"
 

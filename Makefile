@@ -38,7 +38,7 @@ LDFLAGS=$(CMSISFL) -static -mcpu=cortex-m3 -mthumb -mthumb-interwork \
 LDFLAGS+=-L$(CMSIS)/lib -lDriversLPC17xxgnu
 
 # Target locations
-LIBSC		= libs/*.c
+LIBSC		= libs/*.c libs/scanner/*.c
 LIBS		= $(shell echo $(LIBSC) | sed s/\\.c/\\.o/g)
 TASKSC      = tasks/*.c
 TASKS		= $(shell echo $(TASKSC) | sed s/\\.c/\\.o/g)

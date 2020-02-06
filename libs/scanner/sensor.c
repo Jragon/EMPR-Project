@@ -1,10 +1,12 @@
+#include "sensor.h"
+
 #include <lpc_types.h>
 
-#include "i2c.h"
-#include "sensor.h"
+#include "../i2c.h"
+#include "../serial.h"
+#include "../systick_delay.h"
+
 #include "sensor_commands.h"
-#include "serial.h"
-#include "systick_delay.h"
 
 uint8_t sensor_read_register(uint8_t address) {
     uint8_t in;

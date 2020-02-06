@@ -10,6 +10,6 @@ void timer_init() {
     TIM_Cmd(LPC_TIM3, ENABLE);
 }
 
-uint32_t timer_millis() {
+uint32_t timer_get() {
     return LPC_TIM3->TC;
 }

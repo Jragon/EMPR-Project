@@ -13,4 +13,4 @@ void timer_init();
  *
  * @returns milliseconds since timer was inited
  */
-uint32_t timer_millis();
+uint32_t timer_get();

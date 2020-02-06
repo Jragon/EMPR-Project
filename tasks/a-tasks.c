@@ -51,28 +51,8 @@ void task_A1c_z_axis() {
 void task_A2_edge_detection() {
     serial_printf("[Task]: Edge Detection\r\n");
     lcd_clear_display();
-    lcd_printf(0x00, "homing ...");
-    home_x();
-    home_y();
-    // home_z();
-    lcd_clear_display();
-    uint16_t last_intensity = sensor_read_clear();
-    uint16_t high_bound = 10000;
 
-    /*  order:
-        scan y +ve;
-        scan x +ve;
-        scan y -ve;
-        scan x -ve -- to limit switches probably
-
-        probs do inside of the grid
-    */
-
-    while (last_intensity < high_bound) {
-        lcd_printf(0x00, "int: %d", last_intensity);
-        movey(16);
-        last_intensity = sensor_read_clear();
-    }
+    grid_calibrate();
 }
 
 void task_A3_manual_move() {

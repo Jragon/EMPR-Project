@@ -15,19 +15,13 @@ static Motor_t motor_x = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPX, SWITCH_X_MASK, 0,
 static Motor_t motor_y = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPY, SWITCH_Y_MASK, 0, 1};
 static Motor_t motor_z = {MOTOR_ZPEN_LATCH_ADDRESS, MOTOR_STEPZ, SWITCH_Z_MASK, 0, 10};
 
-typedef struct {
-    Motor_t *m_x, *m_y, *m_z;
-    uint32_t tick_size, last_tick;
-    uint16_t x_steps, y_steps, z_steps;
-    uint8_t x_dir, y_dir, z_dir;
-    LimitSwitches_t lims;
-} Motors_t;
+#define MIN_TICK 1500
 
-static volatile Motors_t motors = {
+volatile Motors_t motors = {
   .m_x = &motor_x,
   .m_y = &motor_y,
   .m_z = &motor_z,
-  .tick_size = 1500,  // ~1.5ms
+  .tick_size = MIN_TICK,  // ~1.5ms
 };
 
 void motor_init() {
@@ -52,8 +46,18 @@ void motor_init() {
     NVIC_EnableIRQ(TIMER1_IRQn);  // Enable Stepper Driver Interrupt
 }
 
+void motor_set_tick(uint32_t tick) {
+    motors.tick_size = tick;
+    LPC_TIM1->MR0 = tick;
+}
+
+void motor_reset_tick() {
+    motor_set_tick(MIN_TICK);
+}
+
 uint8_t motor_running() {
-    return motors.x_steps != 0 || motors.y_steps != 0 || motors.z_steps != 0;
+    return LPC_TIM1->TCR == 0b01 &&
+           (motors.x_steps != 0 || motors.y_steps != 0 || motors.z_steps != 0);
 }
 
 void motor_wake() {
@@ -99,7 +103,7 @@ void motor_move_blocking(int x_steps, int y_steps, int z_steps) {
 }
 
 void motor_goto_lims() {
-    motor_set(-1000, -1000, -10000);
+    motor_set(-1500, -2000, -10000);
     motor_wake();
     while (motors.lims != XYZ_LIM && motor_running())
         ;
@@ -110,7 +114,7 @@ LimitSwitches_t motor_get_lims() {
 }
 
 void TIMER1_IRQHandler() {
-    // uint32_t start = timer_millis();
+    // uint32_t start = timer_get();
 
     LPC_TIM1->IR = LPC_TIM1->IR;
 
@@ -158,7 +162,7 @@ void TIMER1_IRQHandler() {
         motor_sleep();
     }
 
-    // serial_printf("time: %d\r\n", timer_millis() - start);
+    // serial_printf("time: %d\r\n", timer_get() - start);
 }
 
 void setup_switches() {

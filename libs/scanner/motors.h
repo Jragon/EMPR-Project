@@ -48,6 +48,18 @@ typedef enum LimitSwitches_t {
     XYZ_LIM = 0b111
 } LimitSwitches_t;
 
+typedef enum Direction_t { DIR_POSITIVE = 0, DIR_NEGATIVE = 1 } Direction_t;
+
+typedef struct {
+    Motor_t *m_x, *m_y, *m_z;
+    uint32_t tick_size, last_tick;
+    uint16_t x_steps, y_steps, z_steps;
+    uint8_t x_dir, y_dir, z_dir;
+    LimitSwitches_t lims;
+} Motors_t;
+
+extern volatile Motors_t motors;
+
 /**
  * N.B. Motors use timer 1
  */
@@ -60,6 +72,8 @@ void motor_set(int x_steps, int y_steps, int z_steps);
 LimitSwitches_t motor_get_lims();
 void motor_move_blocking(int x_steps, int y_steps, int z_steps);
 void motor_goto_lims();
+void motor_set_tick(uint32_t tick);
+void motor_reset_tick();
 
 void setup_switches();
 int check_switch(uint8_t mask);

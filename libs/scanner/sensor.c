@@ -8,6 +8,8 @@
 
 #include "sensor_commands.h"
 
+static uint8_t _intTime = SENSOR_INT_TIME_700MS;
+
 uint8_t sensor_read_register(uint8_t address) {
     uint8_t in;
     uint8_t tx = SENSOR_CMD_REG(1, 0, address);
@@ -37,6 +39,41 @@ void sensor_enable() {
 
     // use ~101 ms to start
     // sensor_write_register(SENSOR_TIMING_ADDRESS, 0xD5);
+}
+
+void sensor_set_int_time(SensorIntTime_t int_time) {
+    sensor_write_register(SENSOR_ATIME_ADDRESS, int_time);
+    _intTime = int_time;
+}
+
+// returns int time in ms.
+uint16_t sensor_get_int_time() {
+    switch (_intTime) {
+        case SENSOR_INT_TIME_2_4MS:
+            return 3;
+            break;
+        case SENSOR_INT_TIME_24MS:
+            return 24;
+            break;
+        case SENSOR_INT_TIME_50MS:
+            return 50;
+            break;
+        case SENSOR_INT_TIME_101MS:
+            return 101;
+            break;
+        case SENSOR_INT_TIME_154MS:
+            return 154;
+            break;
+        case SENSOR_INT_TIME_700MS:
+            return 700;
+            break;
+    }
+
+    return 0;
+}
+
+void sensor_set_gain(SensorGain_t gain) {
+    sensor_write_register(SESNOR_GAIN_ADDRESS, gain);
 }
 
 void sensor_read_all_colours(uint16_t* colours) {

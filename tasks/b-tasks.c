@@ -78,11 +78,9 @@ void _scan_row(uint16_t row, uint16_t int_time) {
     motor_reset_tick();
     grid_move_to_point(row, 0);
 
-    // uint16_t red, green, blue;
-    uint8_t colours[6];
-    // sensor_read_rgb(&red, &green, &blue);
+    uint16_t red, green, blue;
 
-    motor_set_tick(int_time * 250);
+    motor_set_tick(int_time * 1000);
     motor_set(0, grid.max_y, 0);
     uint16_t last_time = timer_get();
     motor_wake();
@@ -92,17 +90,13 @@ void _scan_row(uint16_t row, uint16_t int_time) {
         }
 
         __disable_irq();
-        sensor_read_multiple_registers(SENSOR_RDATA, colours, 6);
-
-        // serial_printf("%d %d %d ", red >> 8, green >> 8, blue >> 8);
-        serial_write((char *)colours, 6);
+        sensor_read_rgb(&red, &green, &blue);
+        serial_printf("%d %d %d;", red >> 8, green >> 8, blue >> 8);
         __enable_irq();
         last_time = timer_get();
     }
-    // serial_printf("\r\n");
-    uint8_t bufend[4] = {0xFF, 0xFF, 0x00, 0x00};
-    serial_write(bufend, 4);
 
+    serial_printf("\n");
     grid.y = grid.max_y - motors.y_steps;
 }
 
@@ -110,16 +104,13 @@ void task_B2_raster_scan() {
     serial_printf("[Task]: B2: Raster Scanner\r\n");
     grid_home();
 
-    sensor_set_int_time(SENSOR_INT_TIME_24MS);
+    sensor_set_int_time(SENSOR_INT_TIME_50MS);
     sensor_set_gain(SENSOR_GAIN_16X);
     uint16_t int_time = sensor_get_int_time();
 
-    for (int row = 0; row < grid.max_x; row += 50) {
+    for (int row = 0; row < grid.max_x; row += 25) {
         _scan_row(row, int_time);
     }
-
-    uint8_t bufend[4] = {0x00, 0x00, 0xFF, 0xFF};
-    serial_write(bufend, 4);
 
     serial_printf("end scan\r\n");
 }

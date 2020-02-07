@@ -1,9 +1,9 @@
 #include <lpc_types.h>
 
-#define GRID_MAX_X 700
-#define GRID_MAX_Y 700
-#define GRID_X_OFFSET 10
-#define GRID_Y_OFFSET 260
+#define GRID_MAX_X 824
+#define GRID_MAX_Y 850
+#define GRID_X_OFFSET 0
+#define GRID_Y_OFFSET 243
 
 typedef struct Grid_t {
     uint32_t max_x;

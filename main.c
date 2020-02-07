@@ -59,7 +59,8 @@ int main() {
     menu_add_option("A1c: Z axis", 3, task_A1c_z_axis);
     menu_add_option("A2:  edge detec", 4, task_A2_edge_detection);
     menu_add_option("A3:  man move", 5, task_A3_manual_move);
-    menu_add_option("B1:  CRGB move", 6, b1_xyz_move_rgb);
+    menu_add_option("B1:  CRGB move", 6, task_B1_rgb_man_move);
+    menu_add_option("B2:  Raster", 7, task_B2_raster_scan);
     menu_draw(0);
 
     while(1) {

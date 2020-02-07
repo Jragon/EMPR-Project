@@ -41,10 +41,10 @@ void task_A1b_square() {
     }
 }
 
+#define DISTANCE 1000
 void task_A1c_z_axis() {
     serial_printf("[Task]: Moving the Z axis\r\n");
     grid_home();
-#define DISTANCE 1000
     grid_z_steps(DISTANCE);
     grid_z_steps(-DISTANCE * 8);
     grid_z_steps(DISTANCE);
@@ -93,11 +93,11 @@ void task_A3_manual_move() {
                 break;
 
             case '3':
-                grid_z_steps(8);
+                grid_z_steps(80);
                 break;
 
             case '6':
-                grid_z_steps(-8);
+                grid_z_steps(-80);
                 break;
 
             case '#':

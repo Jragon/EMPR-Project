@@ -2,3 +2,4 @@
 .ccls*/
 bin/
 .vscode
+venv

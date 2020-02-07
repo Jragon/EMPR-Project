@@ -1,1 +1,2 @@
-void b1_xyz_move_rgb();
+void task_B1_rgb_man_move();
+void task_B2_raster_scan();

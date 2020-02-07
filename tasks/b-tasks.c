@@ -75,25 +75,23 @@ void task_B1_rgb_man_move() {
 }
 
 void _scan_row(uint16_t row, uint16_t int_time) {
-    motor_reset_tick();
-    grid_move_to_point(row, 0);
-
+    uint16_t col = 0;
     uint16_t red, green, blue;
 
-    motor_set_tick(int_time * 1000);
-    motor_set(0, grid.max_y, 0);
-    uint16_t last_time = timer_get();
-    motor_wake();
-    while (motor_running()) {
+    grid_move_to_point(row, col);
+
+    uint32_t last_time = timer_get();
+    while (col < grid.max_y) {
         if (timer_get() - last_time < int_time << 2) {
             continue;
         }
 
-        __disable_irq();
         sensor_read_rgb(&red, &green, &blue);
         serial_printf("%d %d %d;", red >> 8, green >> 8, blue >> 8);
-        __enable_irq();
+
         last_time = timer_get();
+        col += 8;
+        grid_move_to_point(row, col);
     }
 
     serial_printf("\n");
@@ -104,8 +102,8 @@ void task_B2_raster_scan() {
     serial_printf("[Task]: B2: Raster Scanner\r\n");
     grid_home();
 
-    sensor_set_int_time(SENSOR_INT_TIME_50MS);
     sensor_set_gain(SENSOR_GAIN_16X);
+    sensor_set_int_time(SENSOR_INT_TIME_24MS);
     uint16_t int_time = sensor_get_int_time();
 
     for (int row = 0; row < grid.max_x; row += 25) {

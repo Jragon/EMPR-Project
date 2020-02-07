@@ -8,11 +8,11 @@ ppm = []
 
 def writePPM(ppm):
     pplen = min(map(len, ppm))
-    with open("out.ppm", "wb") as f:
-        f.write(bytearray(f"P3 {len(ppm)} {pplen//3} 250\n", 'ascii'))
+    with open("out.ppm", "w") as f:
+        f.write(f"P3 {pplen} {len(ppm)} 250\n")
         for arr in ppm:
             a = arr[0:pplen]
-            a.tofile(f)
+            f.write(' '.join(arr) + '\n')
 
 
 def scanPPM():
@@ -25,10 +25,7 @@ def scanPPM():
         if "end" in dec:
             break
 
-        arr = array.array('B')
-
-        for k in dec.strip()[:-1].split(';'):
-            arr += array.array('B', map(int, k.split(' ')))
+        arr = dec.strip()[:-1].split(';')
 
         print(len(arr))
         out.append(arr)

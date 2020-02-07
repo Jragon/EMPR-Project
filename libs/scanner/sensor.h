@@ -36,3 +36,4 @@ uint16_t sensor_read_clear();
 void sensor_set_int_time(SensorIntTime_t int_time);
 uint16_t sensor_get_int_time();
 void sensor_set_gain(SensorGain_t gain);
+void sensor_read_rgb(uint16_t* red, uint16_t* green, uint16_t* blue);

@@ -85,6 +85,15 @@ void sensor_read_all_colours(uint16_t* colours) {
     }
 }
 
+void sensor_read_rgb(uint16_t* red, uint16_t* green, uint16_t* blue) {
+    uint8_t buffer[6] = {0};
+    sensor_read_multiple_registers(SENSOR_RDATA, buffer, 6);
+
+    *red = buffer[1] << 8 | buffer[0];
+    *green = buffer[3] << 8 | buffer[2];
+    *blue = buffer[5] << 8 | buffer[4];
+}
+
 uint16_t sensor_read_16bit(uint8_t address) {
     uint8_t buffer[2] = {0};
     sensor_read_multiple_registers(address, buffer, 2);

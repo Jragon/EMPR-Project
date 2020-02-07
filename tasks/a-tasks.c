@@ -42,10 +42,11 @@ void task_A1b_square() {
 void task_A1c_z_axis() {
     serial_printf("[Task]: Moving the Z axis\r\n");
     grid_home();
-    grid_z_steps(50);
-    grid_z_steps(-50 * 8);
-    grid_z_steps(50);
-    grid_z_steps(-50 * 8);
+#define DISTANCE 1000
+    grid_z_steps(DISTANCE);
+    grid_z_steps(-DISTANCE * 8);
+    grid_z_steps(DISTANCE);
+    grid_z_steps(-DISTANCE * 8);
 }
 
 void task_A2_edge_detection() {

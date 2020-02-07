@@ -16,6 +16,8 @@ typedef struct Grid_t {
     uint32_t z;
 } Grid_t;
 
+extern Grid_t grid;
+
 void grid_home();
 void grid_calibrate();
 void grid_move_to_point(uint16_t x, uint16_t y);

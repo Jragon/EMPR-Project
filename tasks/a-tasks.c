@@ -31,12 +31,14 @@ void task_A1a_circle() {
 
 void task_A1b_square() {
     serial_printf("[Task]: Drawing a square\r\n");
-    grid_home();
-    grid_move_to_point(50, 50);
-    grid_move_to_point(50, 650);
-    grid_move_to_point(650, 650);
-    grid_move_to_point(650, 50);
-    grid_move_to_point(50, 50);
+    grid_calibrate();
+
+    for (int i = 0; i < 3; i++) {
+        grid_move_to_point(grid.max_x, 0);
+        grid_move_to_point(grid.max_x, grid.max_y);
+        grid_move_to_point(0, grid.max_y);
+        grid_move_to_point(0, 0);
+    }
 }
 
 void task_A1c_z_axis() {

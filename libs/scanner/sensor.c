@@ -8,7 +8,7 @@
 
 #include "sensor_commands.h"
 
-static uint8_t _intTime = SENSOR_INT_TIME_700MS;
+static uint16_t _intTime = 700;
 
 uint8_t sensor_read_register(uint8_t address) {
     uint8_t in;
@@ -41,35 +41,41 @@ void sensor_enable() {
     // sensor_write_register(SENSOR_TIMING_ADDRESS, 0xD5);
 }
 
-void sensor_set_int_time(SensorIntTime_t int_time) {
-    sensor_write_register(SENSOR_ATIME_ADDRESS, int_time);
-    _intTime = int_time;
+void sensor_set_int_time(uint16_t ms) {
+    _intTime = ms;
+    uint8_t out = (uint8_t)(256 - (ms / 2.4));
+    sensor_write_register(SENSOR_ATIME_ADDRESS, out);
 }
+
+// void sensor_set_int_time(SensorIntTime_t int_time) {
+//     sensor_write_register(SENSOR_ATIME_ADDRESS, int_time);
+//     _intTime = int_time;
+// }
 
 // returns int time in ms.
 uint16_t sensor_get_int_time() {
-    switch (_intTime) {
-        case SENSOR_INT_TIME_2_4MS:
-            return 3;
-            break;
-        case SENSOR_INT_TIME_24MS:
-            return 24;
-            break;
-        case SENSOR_INT_TIME_50MS:
-            return 50;
-            break;
-        case SENSOR_INT_TIME_101MS:
-            return 101;
-            break;
-        case SENSOR_INT_TIME_154MS:
-            return 154;
-            break;
-        case SENSOR_INT_TIME_700MS:
-            return 700;
-            break;
-    }
+    // switch (_intTime) {
+    //     case SENSOR_INT_TIME_2_4MS:
+    //         return 3;
+    //         break;
+    //     case SENSOR_INT_TIME_24MS:
+    //         return 24;
+    //         break;
+    //     case SENSOR_INT_TIME_50MS:
+    //         return 50;
+    //         break;
+    //     case SENSOR_INT_TIME_101MS:
+    //         return 101;
+    //         break;
+    //     case SENSOR_INT_TIME_154MS:
+    //         return 154;
+    //         break;
+    //     case SENSOR_INT_TIME_700MS:
+    //         return 700;
+    //         break;
+    // }
 
-    return 0;
+    return _intTime;
 }
 
 void sensor_set_gain(SensorGain_t gain) {

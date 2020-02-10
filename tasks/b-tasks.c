@@ -87,11 +87,11 @@ void _scan_row(uint16_t row, uint16_t int_time) {
         }
 
         sensor_read_rgb(&red, &green, &blue);
-        serial_printf("%d %d %d;", red >> 8, green >> 8, blue >> 8);
-
         last_time = timer_get();
-        col += 8;
         grid_move_to_point(row, col);
+        serial_printf("%d %d %d;", red, green, blue);
+
+        col += 10;
     }
 
     serial_printf("\n");
@@ -103,7 +103,7 @@ void task_B2_raster_scan() {
     grid_home();
 
     sensor_set_gain(SENSOR_GAIN_16X);
-    sensor_set_int_time(SENSOR_INT_TIME_24MS);
+    sensor_set_int_time(3);
     uint16_t int_time = sensor_get_int_time();
 
     for (int row = 0; row < grid.max_x; row += 25) {

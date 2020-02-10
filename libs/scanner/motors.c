@@ -17,12 +17,12 @@ static Motor_t motor_z = {MOTOR_ZPEN_LATCH_ADDRESS, MOTOR_STEPZ, SWITCH_Z_MASK, 
 
 #define MIN_TICK 1500
 
-volatile Motors_t motors = {
-  .m_x = &motor_x,
-  .m_y = &motor_y,
-  .m_z = &motor_z,
-  .tick_size = MIN_TICK,  // ~1.5ms
-};
+volatile Motors_t motors = {.m_x = &motor_x,
+                            .m_y = &motor_y,
+                            .m_z = &motor_z,
+                            .tick_size = MIN_TICK,  // ~1.5ms
+                            .sleep_tick = MIN_TICK * 500,
+                            .off = 1};
 
 void motor_init() {
     timer_init();
@@ -48,7 +48,6 @@ void motor_init() {
 
 void motor_set_tick(uint32_t tick) {
     motors.tick_size = tick;
-    LPC_TIM1->MR0 = tick;
 }
 
 void motor_reset_tick() {
@@ -56,23 +55,33 @@ void motor_reset_tick() {
 }
 
 uint8_t motor_running() {
-    return LPC_TIM1->TCR == 0b01 &&
+    return (motors.off == 0) &&
            (motors.x_steps != 0 || motors.y_steps != 0 || motors.z_steps != 0);
 }
 
 void motor_wake() {
-    // reset the timer
+    motors.off = 0;
+
+    LPC_TIM1->MR0 = motors.tick_size;
     LPC_TIM1->TCR = 0b10;
-    // enable timer
     LPC_TIM1->TCR = 0b01;
 }
 
 void motor_sleep() {
-    LPC_TIM1->TCR = 0;
+    motors.off = 1;
 
-    // uint8_t off = 0;
-    // i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &off, 1);
-    // i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &off, 1);
+    LPC_TIM1->MR0 = motors.sleep_tick;
+    LPC_TIM1->TCR = 0b10;
+    LPC_TIM1->TCR = 0b01;
+}
+
+void motor_off() {
+    LPC_TIM1->TCR = 0;
+    serial_printf("motors sleeping\r\n");
+
+    uint8_t off = 0;
+    i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &off, 1);
+    i2c_send_data(MOTOR_ZPEN_LATCH_ADDRESS, &off, 1);
 }
 
 uint8_t motor_get_move(Motor_t *motor, uint8_t direction) {
@@ -117,6 +126,11 @@ void TIMER1_IRQHandler() {
     // uint32_t start = timer_get();
 
     LPC_TIM1->IR = LPC_TIM1->IR;
+
+    if (motors.off == 1) {
+        motor_off();
+        return;
+    }
 
     uint8_t sw;
     i2c_recieve_data(SWITCH_ADDRESS, &sw, 1);

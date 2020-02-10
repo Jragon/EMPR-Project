@@ -52,9 +52,9 @@ typedef enum Direction_t { DIR_POSITIVE = 0, DIR_NEGATIVE = 1 } Direction_t;
 
 typedef struct {
     Motor_t *m_x, *m_y, *m_z;
-    uint32_t tick_size, last_tick;
+    uint32_t tick_size, last_tick, sleep_tick;
     uint16_t x_steps, y_steps, z_steps;
-    uint8_t x_dir, y_dir, z_dir;
+    uint8_t x_dir, y_dir, z_dir, off;
     LimitSwitches_t lims;
 } Motors_t;
 

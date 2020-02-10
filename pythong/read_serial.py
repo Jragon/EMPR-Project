@@ -2,7 +2,7 @@ import serial
 import os
 import array
 
-ser = serial.Serial('/dev/ttyACM0')
+ser = serial.Serial('/dev/ttyACM0', 115200)
 ppm = []
 
 

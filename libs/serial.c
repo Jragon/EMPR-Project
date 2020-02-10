@@ -1,10 +1,10 @@
+#include "serial.h"
+
 #include <lpc17xx_pinsel.h>
 #include <lpc17xx_uart.h>
 
 #include <stdarg.h>
 #include <stdio.h>
-
-#include "serial.h"
 
 void serial_init() {
     UART_CFG_Type UARTConfigStruct;           // UART Configuration structure variable
@@ -29,6 +29,7 @@ void serial_init() {
         - None parity
     */
     UART_ConfigStructInit(&UARTConfigStruct);
+    UARTConfigStruct.Baud_rate = 115200;
     /*  Initialize FIFOConfigStruct to default state:
         - FIFO_DMAMode = DISABLE
         - FIFO_Level = UART_FIFO_TRGLEV0
@@ -44,12 +45,12 @@ void serial_init() {
     // corresponding parameter
     UART_FIFOConfig((LPC_UART_TypeDef*)LPC_UART0,
                     &UARTFIFOConfigStruct);  // Initialize FIFO for UART0 peripheral
-    UART_TxCmd((LPC_UART_TypeDef*)LPC_UART0, ENABLE);   // Enable UART Transmit
+    UART_TxCmd((LPC_UART_TypeDef*)LPC_UART0, ENABLE);  // Enable UART Transmit
 }
 
 int serial_read(char* buf, int length) {
     return (
-               UART_Receive((LPC_UART_TypeDef*)LPC_UART0, (uint8_t*)buf, length, NONE_BLOCKING));
+      UART_Receive((LPC_UART_TypeDef*)LPC_UART0, (uint8_t*)buf, length, NONE_BLOCKING));
 }
 
 int serial_write(char* buf, int length) {

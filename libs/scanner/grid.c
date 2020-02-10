@@ -6,6 +6,7 @@
 
 #include <string.h>
 
+#include "../lcd.h"
 #include "../serial.h"
 #include "../timer.h"
 
@@ -50,6 +51,8 @@ void _run_until_thresh(Direction_t comp_dir, uint16_t thresh, uint16_t int_time)
         }
 
         last_time = timer_get();
+        // serial_printf("%d\r\n", last_c);
+        lcd_printf(0x40, "cdata: %d     ", last_c);
         __enable_irq();
     }
 }
@@ -66,7 +69,7 @@ void grid_calibrate() {
     sensor_set_gain(SENSOR_GAIN_60X);
     // low int time needs high gain otherwise the values take to long to read and things
     // are slow.
-    sensor_set_int_time(SENSOR_INT_TIME_24MS);
+    sensor_set_int_time(24);
     uint16_t int_time = sensor_get_int_time();
 
     // move at 1/4 the int time

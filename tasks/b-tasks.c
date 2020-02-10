@@ -82,7 +82,7 @@ void _scan_row(uint16_t row, uint16_t int_time, uint8_t lcd, uint8_t serial) {
 
     uint32_t last_time = timer_get();
     while (col < grid.max_y) {
-        if (timer_get() - last_time < int_time << 2) {
+        if (timer_get() - last_time < int_time) {
             continue;
         }
 

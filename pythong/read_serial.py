@@ -27,7 +27,7 @@ def scanPPM():
             break
 
         arr = dec.strip()[:-1].split(';')
-        max_val = max(int(max([max(x.split(' ')) for x in arr])), max_val)
+        max_val = max(max([max(map(int, x.split(' '))) for x in arr]), max_val)
 
         print(len(arr), max_val)
         out.append(arr)

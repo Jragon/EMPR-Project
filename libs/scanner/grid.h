@@ -3,7 +3,7 @@
 #define GRID_MAX_X 824
 #define GRID_MAX_Y 850
 #define GRID_X_OFFSET 0
-#define GRID_Y_OFFSET 243
+#define GRID_Y_OFFSET 200
 
 typedef struct Grid_t {
     uint32_t max_x;

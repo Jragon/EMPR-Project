@@ -28,16 +28,14 @@ void grid_home() {
 
 void _run_until_thresh(Direction_t comp_dir, uint16_t thresh, uint16_t int_time) {
     // wait for first int time cycle
-    uint32_t last_time = timer_get();
-    while (timer_get() - last_time < int_time << 1)
-        ;
-
+    // serial_printf("a;lskdj)");
+    timer_block(int_time << 3);
     uint16_t last_c = sensor_read_clear();
+    uint32_t last_time = timer_get();
 
     motor_wake();
-    last_time = timer_get();
     while (motor_running()) {
-        if (timer_get() - last_time < int_time) {
+        if (timer_get() - last_time < int_time << 2) {
             continue;
         }
 
@@ -51,7 +49,6 @@ void _run_until_thresh(Direction_t comp_dir, uint16_t thresh, uint16_t int_time)
         }
 
         last_time = timer_get();
-        // serial_printf("%d\r\n", last_c);
         lcd_printf(0x40, "cdata: %d     ", last_c);
         __enable_irq();
     }
@@ -64,12 +61,15 @@ void grid_calibrate() {
 
     serial_printf("calibrating grid\r\n");
 
+    // fuck knows why we need this ... timings somewhere are dodgy
+    timer_block(2);
     // set the gain high since all we're interested in is whether the sensor reads nothing
     // or anything (ie on the platform or not on the platform).
     sensor_set_gain(SENSOR_GAIN_60X);
+
     // low int time needs high gain otherwise the values take to long to read and things
     // are slow.
-    sensor_set_int_time(24);
+    sensor_set_int_time(8);
     uint16_t int_time = sensor_get_int_time();
 
     // move at 1/4 the int time
@@ -80,30 +80,30 @@ void grid_calibrate() {
     serial_printf("find y offset\r\n");
 
     motor_set(0, 250, 0);
-    _run_until_thresh(DIR_POSITIVE, 8000, int_time);
-    grid.y_offset = 250 - motors.y_steps + 64;
+    _run_until_thresh(DIR_POSITIVE, 3800, int_time);
+    grid.y_offset = 250 - motors.y_steps;
     serial_printf("y offset: %d\r\n", grid.y_offset);
 
     serial_printf("find y max\r\n");
 
     // carry on moving along the y axis until we fall off the platform
     motor_set(0, 1500, 0);
-    _run_until_thresh(DIR_NEGATIVE, 8000, int_time);
-    grid.max_y = 1500 - motors.y_steps - 128;
+    _run_until_thresh(DIR_NEGATIVE, 4000, int_time);
+    grid.max_y = 1500 - motors.y_steps - 64;
     serial_printf("y max: %d\r\n", grid.max_y);
 
     motor_reset_tick();
     grid_home();
+    grid_move_to_point(0, 100);
     motor_set_tick(motor_tick);
 
     // it is always zero idc
     grid.x_offset = 0;
     serial_printf("x offset: %d\r\n", grid.x_offset);
 
-    serial_printf("find y max\r\n");
-
+    serial_printf("find x max\r\n");
     motor_set(825, 0, 0);
-    _run_until_thresh(DIR_NEGATIVE, 8000, int_time);
+    _run_until_thresh(DIR_NEGATIVE, 3800, int_time);
     grid.max_x = 825 - motors.x_steps;
     serial_printf("x max: %d\r\n", grid.max_x);
 

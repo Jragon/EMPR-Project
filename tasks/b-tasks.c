@@ -57,7 +57,7 @@ void task_B1_rgb_man_move() {
     uint32_t time = timer_get();
 
     while (1) {
-        if (timer_get() - time < 5) {
+        if (timer_get() - time < 7) {
             continue;
         }
         time = timer_get();
@@ -66,11 +66,9 @@ void task_B1_rgb_man_move() {
             continue;
         }
 
-        systick_delay_flag_reset();
-
         sensor_read_all_colours(rgb_vals);
-        lcd_printf(0x40, "(%3d, %3d, %3d)  ", rgb_vals[1] >> 8, rgb_vals[2] >> 8,
-                   rgb_vals[3] >> 8);
+        lcd_printf(0x00, "C %5d, R %5d", rgb_vals[0], rgb_vals[1]);
+        lcd_printf(0x40, "G %5d, B %5d", rgb_vals[2], rgb_vals[3]);
     }
 }
 

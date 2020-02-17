@@ -126,6 +126,26 @@ void grid_move_to_point(uint16_t x, uint16_t y) {
     grid.y = y;
 }
 
+void grid_step_to_point(uint16_t x, uint16_t y, uint16_t step) {
+    uint16_t movex, movey;
+
+    if (x < grid.x) {
+        // neg dir
+        movex = grid.x < step ? 0 : grid.x - step;
+    } else {
+        movex = (grid.x + step < x) ? grid.x + step : x;
+    }
+
+    if (y < grid.y) {
+        // neg dir
+        movey = grid.y < step ? 0 : grid.y - step;
+    } else {
+        movey = (grid.y + step < y) ? grid.y + step : y;
+    }
+
+    grid_move_to_point(movex, movey);
+}
+
 void grid_x_steps(int steps) {
     motor_move_blocking(steps, 0, 0);
     if (motor_get_lims() & X_LIM) {

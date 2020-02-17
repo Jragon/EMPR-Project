@@ -21,6 +21,7 @@ extern Grid_t grid;
 void grid_home();
 void grid_calibrate();
 void grid_move_to_point(uint16_t x, uint16_t y);
+void grid_step_to_point(uint16_t x, uint16_t y, uint16_t step);
 
 void grid_x_steps(int steps);
 void grid_y_steps(int steps);

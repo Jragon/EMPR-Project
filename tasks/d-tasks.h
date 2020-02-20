@@ -1,1 +1,0 @@
-void flag_edge_detect();

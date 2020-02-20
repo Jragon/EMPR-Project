@@ -39,6 +39,7 @@ void _move_print_rgb(uint16_t x, uint16_t y, uint16_t step, uint16_t int_time) {
 
         lcd_printf(0x00, "R %5d       ", red);
         lcd_printf(0x40, "G %5d B %5d", green, blue);
+        serial_printf("%d %d: %d %d %d;", grid.x - step, grid.y - step, red, green, blue);
     }
 }
 
@@ -78,4 +79,24 @@ void flag_edge_detect() {
         grid_move_to_point(0, grid.max_y);
         _move_print_rgb(grid.max_x, 0, 5, int_time);
     }
+}
+
+void flag_scan() {
+    serial_printf("[Task]: Flag Scan\r\n");
+    grid_home();
+
+    sensor_set_gain(SENSOR_GAIN_16X);
+    sensor_set_int_time(3);
+    uint16_t int_time = sensor_get_int_time();
+
+    grid_move_to_point(0, 0);
+    _move_print_rgb(grid.max_x, grid.max_y, 5, int_time);
+
+    grid_move_to_point(0, grid.max_y);
+    _move_print_rgb(grid.max_x, 0, 5, int_time);
+
+    grid_move_to_point(grid.max_x, grid.max_y / 2);
+    _move_print_rgb(0, grid.max_y / 2, 5, int_time);
+
+    serial_printf("\r\n");
 }

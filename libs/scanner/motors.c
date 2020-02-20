@@ -77,7 +77,7 @@ void motor_sleep() {
 
 void motor_off() {
     LPC_TIM1->TCR = 0;
-    serial_printf("motors sleeping\r\n");
+    serial_printf("[Motors]: motors sleeping\r\n");
 
     uint8_t off = 0;
     i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &off, 1);

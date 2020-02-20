@@ -48,6 +48,10 @@ void serial_init() {
     UART_TxCmd((LPC_UART_TypeDef*)LPC_UART0, ENABLE);  // Enable UART Transmit
 }
 
+int serial_read_blocking(char* buf, int length) {
+    return (UART_Receive((LPC_UART_TypeDef*)LPC_UART0, (uint8_t*)buf, length, BLOCKING));
+}
+
 int serial_read(char* buf, int length) {
     return (
       UART_Receive((LPC_UART_TypeDef*)LPC_UART0, (uint8_t*)buf, length, NONE_BLOCKING));

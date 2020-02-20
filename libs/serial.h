@@ -15,6 +15,15 @@ void serial_init();
 int serial_read(char* buf, int length);
 
 /**
+    @brief reads data from serial port
+
+    @param buf buffer to read data into
+    @param length how many bytes to read
+    @return int bytes read
+*/
+int serial_read_blocking(char* buf, int length);
+
+/**
     @brief writes data to serial port
 
     @param buf data to write

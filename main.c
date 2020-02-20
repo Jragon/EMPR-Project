@@ -62,6 +62,7 @@ int main() {
     menu_add_option("B1:  CRGB move", 6, task_B1_rgb_man_move);
     menu_add_option("B2:  Raster", 7, task_B2_raster_scan);
     menu_add_option("B3:  Search", 8, task_B3_color_search);
+    menu_add_option("D2:  PC coord", 9, pc_coordinate_colour);
     menu_draw(0);
 
     while(1) {

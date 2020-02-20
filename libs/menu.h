@@ -13,6 +13,8 @@ typedef struct menu_item {
 */
 void menu_init();
 
+void menu_print_items();
+
 /**
     @breif add an option to the menu
 
@@ -20,7 +22,7 @@ void menu_init();
     @param the index of the option
     @param the callback function pointer
 */
-void menu_add_option(char* name, int8_t index, void(*func)());
+void menu_add_option(char* name, int8_t index, void (*func)());
 
 /**
     @breif run the callback of the given menu item

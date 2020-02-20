@@ -1,6 +1,7 @@
 #include <lpc17xx_gpio.h>
 
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <lpc17xx_gpio.h>

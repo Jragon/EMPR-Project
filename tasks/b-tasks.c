@@ -12,34 +12,7 @@
 #include "../libs/systick_delay.h"
 #include "../libs/timer.h"
 
-uint8_t _manmove() {
-    char k = keypad_read();
-    switch (k) {
-        case '1':
-            grid_x_steps(8);
-            break;
-        case '4':
-            grid_x_steps(-8);
-            break;
-        case '2':
-            grid_y_steps(8);
-            break;
-        case '5':
-            grid_y_steps(-8);
-            break;
-        case '3':
-            grid_z_steps(8);
-            break;
-        case '6':
-            grid_z_steps(-8);
-            break;
-        default:
-            return -1;
-            break;
-    }
-
-    return 0;
-}
+#include "tasks.h"
 
 void task_B1_rgb_man_move() {
     serial_printf("[Task]: B1: RGB Manual Move\r\n");
@@ -51,9 +24,6 @@ void task_B1_rgb_man_move() {
 
     uint16_t rgb_vals[4] = {0};
     sensor_read_all_colours(rgb_vals);
-
-    lcd_printf(0x00, "Press 1-6(R,G,B)");
-    lcd_printf(0x40, "(%3d, %3d, %3d)   ", rgb_vals[1], rgb_vals[2], rgb_vals[3]);
     uint32_t time = timer_get();
 
     while (1) {

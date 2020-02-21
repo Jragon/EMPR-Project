@@ -9,6 +9,9 @@
 #include "../libs/scanner/sensor.h"
 #include "../libs/serial.h"
 #include "../libs/systick_delay.h"
+#include "../libs/timer.h"
+
+#include "tasks.h"
 
 void task_A1a_circle() {
     serial_printf("[Task]: Drawing a circle\r\n");
@@ -59,56 +62,24 @@ void task_A2_edge_detection() {
 }
 
 void task_A3_manual_move() {
-    serial_printf("[Task]: Manual move mode\r\n");
-    keypad_set_as_inputs();
+    serial_printf("[Task]: A1: Manual Move\r\n");
     lcd_clear_display();
-    lcd_printf(0x00, "Homing");
-    grid_home();
-    lcd_printf(0x00, "Press 1-6");
-    lcd_printf(0x40, "(%3d, %3d, %3d)", 0, 0, 0);
-    systick_delay_flag_reset();
 
+    lcd_printf(0x00, "homing...");
+
+    grid_home();
+
+    uint32_t time = timer_get();
     while (1) {
-        if (systick_flag() == 0) {
+        if (timer_get() - time < 7) {
+            continue;
+        }
+        time = timer_get();
+        if (_manmove() == -1) {
             continue;
         }
 
-        char k = keypad_read();
-
-        switch (k) {
-            case '1':
-                grid_x_steps(8);
-                break;
-
-            case '4':
-                grid_x_steps(-8);
-                break;
-
-            case '2':
-                grid_y_steps(8);
-                break;
-
-            case '5':
-                grid_y_steps(-8);
-                break;
-
-            case '3':
-                grid_z_steps(80);
-                break;
-
-            case '6':
-                grid_z_steps(-80);
-                break;
-
-            case '#':
-                return;
-
-            default:
-                continue;
-                break;
-        }
-
-        systick_delay_flag_reset();
-        lcd_printf(0x40, "(%3d, %3d, %3d)", grid_get_x(), grid_get_y(), grid_get_z());
+        lcd_printf(0x00, "X: %4d, Y: %4d", grid.x, grid.y);
+        lcd_printf(0x40, "Z: %4d", grid.z);
     }
 }

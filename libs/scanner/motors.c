@@ -77,7 +77,7 @@ void motor_sleep() {
 
 void motor_off() {
     LPC_TIM1->TCR = 0;
-    serial_printf("[Motors]: motors sleeping\r\n");
+    serial_printf("[Motors]: motors off\r\n");
 
     uint8_t off = 0;
     i2c_send_data(MOTOR_XY_LATCH_ADDRESS, &off, 1);
@@ -123,9 +123,11 @@ LimitSwitches_t motor_get_lims() {
 }
 
 void TIMER1_IRQHandler() {
-    // uint32_t start = timer_get();
+    if (TIM_GetIntStatus(LPC_TIM1, TIM_MR0_INT) == 0) {
+        return;
+    }
 
-    LPC_TIM1->IR = LPC_TIM1->IR;
+    TIM_ClearIntPending(LPC_TIM1, TIM_MR0_INT);
 
     if (motors.off == 1) {
         motor_off();
@@ -175,8 +177,6 @@ void TIMER1_IRQHandler() {
         // ie no steps left running
         motor_sleep();
     }
-
-    // serial_printf("time: %d\r\n", timer_get() - start);
 }
 
 void setup_switches() {

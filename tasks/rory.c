@@ -45,7 +45,7 @@ void _step_to_thresh(uint16_t x, uint16_t y, uint16_t *colours, uint16_t *last_c
 }
 
 // change thresh
-#define STEP 5
+#define STEP 20
 #define THRESH 150
 void detect_edges() {
     serial_printf("[Indvidiual]: Detect edges\r\n");
@@ -73,37 +73,21 @@ void detect_edges() {
     _step_to_thresh(grid.max_x, GRID_HALF_Y, colours, last_colours, int_time, THRESH,
                     STEP);
     min_x = grid.x;
-    // timer_block(500);
-    // serial_printf("%d, %d\r\n", grid.x, grid.y);
-    // serial_printf("%d, %d\r\n", grid.x, grid.y);
-
-    // grid_move_to_point(min_x);
-    // timer_block(100);
-    // grid_move_to_point(min_x, grid.y);
-    // serial_printf("%d, %d\r\n", grid.x, grid.y);
-    // timer_block(400);
-
-    // return;
 
     grid_move_to_point(grid.max_x - 100, GRID_HALF_Y);
     _step_to_thresh(0, GRID_HALF_Y, colours, last_colours, int_time, THRESH, STEP);
     max_x = grid.x;
-    timer_block(500);
 
     grid_home();
 
     while (1) {
-        grid_move_to_point(min_y, min_x);
-        serial_printf("(%d, %d)\r\n", grid.x, grid.y);
-        timer_block(500);
-        grid_move_to_point(max_y, min_x);
-        serial_printf("(%d, %d)\r\n", grid.x, grid.y);
-        timer_block(500);
-        grid_move_to_point(max_y, max_x);
-        serial_printf("(%d, %d)\r\n", grid.x, grid.y);
-        timer_block(500);
-        grid_move_to_point(min_y, max_x);
-        serial_printf("(%d, %d)\r\n", grid.x, grid.y);
-        timer_block(500);
+        grid_move_to_point(min_x, min_y);
+        timer_block(250);
+        grid_move_to_point(max_x, min_y);
+        timer_block(250);
+        grid_move_to_point(max_x, max_y);
+        timer_block(250);
+        grid_move_to_point(min_x, max_y);
+        timer_block(250);
     }
 }

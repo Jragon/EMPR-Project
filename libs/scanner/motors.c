@@ -21,7 +21,7 @@ volatile Motors_t motors = {.m_x = &motor_x,
                             .m_y = &motor_y,
                             .m_z = &motor_z,
                             .tick_size = MIN_TICK,  // ~1.5ms
-                            .sleep_tick = MIN_TICK * 500,
+                            .sleep_tick = MIN_TICK * 1000,
                             .off = 1};
 
 void motor_init() {

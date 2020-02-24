@@ -28,6 +28,9 @@ void _step_to_thresh(uint16_t x, uint16_t y, uint16_t* colours, uint16_t* last_c
         grid_step_to_point(x, y, step);
         last_time = timer_get();
 
+        // serial_printf("C %5d, R %5d, G: %5d, B: %5d\r\n", colours[0], colours[1],
+        //               colours[2], colours[3]);
+
         for (int i = 0; i < 4; i++) {
             // any change greater than thresh on any channel
             uint16_t diff = ABS((int)(last_colours[i] - colours[i]));
@@ -105,10 +108,16 @@ void detect_scan() {
     uint16_t red, green, blue;
     serial_printf("[Data]: .error = 0, .width = %d, .height = %d, .vals = {", width,
                   height);
+
+    sensor_read_rgb(&red, &green, &blue);
     for (int i = 1; i <= POINTS; i++) {
         for (int j = 1; j <= POINTS; j++) {
             grid_move_to_point(start_x + widthStep * j, start_y + heightStep * i);
             timer_block(int_time);
+            while (sensor_ready() == 0) {
+                serial_printf("Sensor not ready\r\n");
+                timer_block(int_time);
+            }
             sensor_read_rgb(&red, &green, &blue);
             serial_printf("{%d, %d, %d}%c ", red, green, blue,
                           (i == POINTS && j == POINTS) ? '}' : ',');

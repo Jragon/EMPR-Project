@@ -43,7 +43,6 @@ void EINT3_IRQHandler() {
 
 
 int main() {
-    extern int8_t menu_index;
     serial_init();
     i2c_init();
     lcd_init();
@@ -73,17 +72,5 @@ int main() {
         systick_delay_blocking(25);
     }
 
-            case '#':
-                serial_printf("[Menu]: Called menu item %i\r\n", menu_index);
-                menu_run_callback(menu_index);
-                menu_draw(0);
-
-            default:
-                break;
-        }
-
-        keypad_set_as_inputs();
-        systick_delay_flag_reset();
-        keypad_reset_flag();
-    }
+    return 0;
 }

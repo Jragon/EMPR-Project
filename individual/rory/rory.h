@@ -7,3 +7,4 @@ struct scanData {
 
 void detect_edges();
 void detect_scan();
+void recognise();

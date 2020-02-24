@@ -136,3 +136,60 @@ void detect_scan() {
     serial_printf("\r\n");
     grid_move_to_point(grid.max_y, grid.max_y);
 }
+
+#define DATA_LEN 6
+int _get_min_error() {
+    int min_index = 0;
+    int min = data[min_index].error;
+    serial_printf("Errors: \r\n");
+    for (uint8_t scan_index = 0; scan_index < DATA_LEN; scan_index++) {
+        serial_printf("%s: %d\r\n", data[scan_index].name, data[scan_index].error);
+        if (data[scan_index].error < min) {
+            min_index = scan_index;
+            min = data[scan_index].error;
+        }
+    }
+
+    return min_index;
+}
+
+void recognise() {
+    serial_printf("[Rory]: Recognise Image\r\n");
+
+    scan_t scan;
+    _get_edge_data(&scan);
+
+    sensor_set_gain(SENSOR_GAIN_16X);
+    sensor_set_int_time(3);
+    uint16_t int_time = sensor_get_int_time();
+
+    uint16_t colours[4] = {0};
+    sensor_read_all_colours(colours);
+    for (int i = 1; i <= POINTS; i++) {
+        for (int j = 1; j <= POINTS; j++) {
+            grid_move_to_point(scan.startX + scan.widthStep * j,
+                               scan.startY + scan.heightStep * i);
+            timer_block(int_time);
+            while (sensor_ready() == 0) {
+                serial_printf("Sensor not ready\r\n");
+                timer_block(int_time);
+            }
+            sensor_read_all_colours(colours);
+
+            // compare current results an store error
+            for (uint8_t scan_index = 0; scan_index < DATA_LEN; scan_index++) {
+                for (uint8_t j = 0; j < 3; j++) {
+                    data[scan_index].error +=
+                      ABS((int)(data[scan_index].vals[i][j] - colours[j + 1]));
+                }
+            }
+        }
+    }
+
+    int min_index = _get_min_error();
+    serial_printf("%s: %.2f%%\r\n", data[min_index].name,
+                  (float)(100 - data[min_index].error / 1000));
+    lcd_printf(0, "%s", data[min_index].name);
+    lcd_printf(0x40, "%.2f%% match", (float)(100 - data[min_index].error / 1000));
+    grid_move_to_point(grid.max_y, grid.max_y);
+}

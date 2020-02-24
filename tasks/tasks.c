@@ -1,5 +1,5 @@
-#include "../libs/keypad.h"
-#include "../libs/scanner/grid.h"
+#include "libs/keypad.h"
+#include "libs/scanner/grid.h"
 
 uint8_t _manmove() {
     char k = keypad_read();

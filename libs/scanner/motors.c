@@ -5,11 +5,11 @@
 #include <lpc17xx_i2c.h>
 #include <lpc17xx_timer.h>
 
-#include "../i2c.h"
-#include "../serial.h"
-#include "../systick_delay.h"
-#include "../timer.h"
-#include "../util_macros.h"
+#include "libs/i2c.h"
+#include "libs/serial.h"
+#include "libs/systick_delay.h"
+#include "libs/timer.h"
+#include "libs/util_macros.h"
 
 static Motor_t motor_x = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPX, SWITCH_X_MASK, 0, 1};
 static Motor_t motor_y = {MOTOR_XY_LATCH_ADDRESS, MOTOR_STEPY, SWITCH_Y_MASK, 0, 1};

@@ -6,9 +6,9 @@
 
 #include <string.h>
 
-#include "../lcd.h"
-#include "../serial.h"
-#include "../timer.h"
+#include "libs/lcd.h"
+#include "libs/serial.h"
+#include "libs/timer.h"
 
 #include "motors.h"
 #include "sensor.h"

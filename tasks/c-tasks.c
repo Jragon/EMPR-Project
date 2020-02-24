@@ -2,15 +2,15 @@
 
 #include <math.h>
 
-#include "../libs/keypad.h"
-#include "../libs/lcd.h"
-#include "../libs/scanner/grid.h"
-#include "../libs/scanner/motors.h"
-#include "../libs/scanner/sensor.h"
-#include "../libs/serial.h"
-#include "../libs/systick_delay.h"
-#include "../libs/timer.h"
-#include "../libs/util_macros.h"
+#include "libs/keypad.h"
+#include "libs/lcd.h"
+#include "libs/scanner/grid.h"
+#include "libs/scanner/motors.h"
+#include "libs/scanner/sensor.h"
+#include "libs/serial.h"
+#include "libs/systick_delay.h"
+#include "libs/timer.h"
+#include "libs/util_macros.h"
 
 void _move_print_rgb(uint16_t x, uint16_t y, uint16_t step, uint16_t int_time) {
     uint16_t red, green, blue;

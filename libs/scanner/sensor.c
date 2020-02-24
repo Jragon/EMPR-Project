@@ -2,9 +2,9 @@
 
 #include <lpc_types.h>
 
-#include "../i2c.h"
-#include "../serial.h"
-#include "../systick_delay.h"
+#include "libs/i2c.h"
+#include "libs/serial.h"
+#include "libs/systick_delay.h"
 
 #include "sensor_commands.h"
 

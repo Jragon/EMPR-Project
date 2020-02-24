@@ -2,14 +2,14 @@
 
 #include <math.h>
 
-#include "../libs/keypad.h"
-#include "../libs/lcd.h"
-#include "../libs/scanner/grid.h"
-#include "../libs/scanner/motors.h"
-#include "../libs/scanner/sensor.h"
-#include "../libs/serial.h"
-#include "../libs/systick_delay.h"
-#include "../libs/timer.h"
+#include "libs/keypad.h"
+#include "libs/lcd.h"
+#include "libs/scanner/grid.h"
+#include "libs/scanner/motors.h"
+#include "libs/scanner/sensor.h"
+#include "libs/serial.h"
+#include "libs/systick_delay.h"
+#include "libs/timer.h"
 
 #include "tasks.h"
 

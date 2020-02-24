@@ -10,6 +10,9 @@
 #define SENSOR_ATIME_ADDRESS 0x01
 #define SESNOR_GAIN_ADDRESS 0x0F
 
+#define SENSOR_STATUS_ADDRESS 0x13
+#define SENSOR_STATUS_AVALID 0x01
+
 // these data addresses are each 16 bits long
 #define SENSOR_CDATA 0x14
 #define SENSOR_RDATA 0x16

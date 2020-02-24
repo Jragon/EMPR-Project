@@ -1,71 +1,52 @@
 import serial
-from plot_flags import loadImage
+import re
 import os
-import array
-import imagehash
-import pickle
 
 ser = serial.Serial('/dev/ttyACM0', 115200)
-ppm = []
-
-
-def writePPM(filename, ppm, max_val):
-    pplen = min(map(len, ppm))
-    with open(filename, "w") as f:
-        f.write(f"P3 {pplen} {len(ppm)} {max_val}\n")
-        for arr in ppm:
-            a = arr[0:pplen]
-            f.write(' '.join(arr) + '\n')
-
-
-def scanPPM():
-    out = []
-    print("[Python]: Scan to PPM ")
-    line = ser.readline()
-    max_val = 0
-    while (True):
-        dec = line.decode()
-        print(dec)
-        if "end" in dec:
-            break
-
-        arr = dec.strip()[:-1].split(';')
-        max_val = max(max([max(map(int, x.split(' '))) for x in arr]), max_val)
-
-        print(len(arr), max_val)
-        out.append(arr)
-        writePPM("out.ppm", out, max_val + 10)
-        line = ser.readline()
 
 
 def collateScans():
-    flags = []
-    for flagname in os.listdir("./flags"):
-        with open(f"./flags/{flagname}") as f:
-            flags.append(f.readline().strip())
+    scans = []
+    for scanname in os.listdir("./scans"):
+        with open(f"scans/{scanname}") as f:
+            scans.append(f.readline().strip())
 
-    with open("flags.c", 'w') as f:
-        fs = ',\n'.join(flags)
-        f.write(f"flag_t flags[] = {{ \n {fs} \n  }};")
+    with open("data.c", 'w') as f:
+        f.write('#include "data.h"\n\n')
+
+        fs = ',\n'.join(scans)
+        f.write(f"data_t data[] = {{ \n {fs} \n  }};")
 
 
 def scan():
-    print("[Python]: scan flag")
-    name = input("Enter flag name: ")
+    print("[Python]: scan")
+    name = input("[Python] Enter scan name: ")
     print("[Python]: Scanning ...")
-    vals = ser.readline().decode().strip()
+
+    line = ser.readline()
+    while (True):
+        try:
+            dec = line.decode()
+        except:
+            dec = False
+
+        if dec:
+            print(dec, end='')
+            if "Data" in dec:
+                vals = dec.strip().replace("[Data]: ", "")
+                break
+
+        line = ser.readline()
 
     print("[Python]: Writing ...")
-    with open(f"flags/{name}", "w") as f:
-        # vals come in like {{r, g, b}, ...}
-        f.write(f'{{ .name = "{name}", {vals} }}')
+    with open(f"scans/{name}", "w") as f:
+        f.write(f'{{ .name = "{name}", .error = 0, {vals} }}')
 
     collateScans()
 
 
 def main():
     line = ser.readline()
-    scan = False
     while (True):
         try:
             dec = line.decode()

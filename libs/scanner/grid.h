@@ -1,9 +1,9 @@
 #include <lpc_types.h>
 
-#define GRID_MAX_X 824
-#define GRID_MAX_Y 850
+#define GRID_MAX_X 1000
+#define GRID_MAX_Y 950
 #define GRID_X_OFFSET 0
-#define GRID_Y_OFFSET 200
+#define GRID_Y_OFFSET 191
 #define GRID_HALF_X (grid.max_x >> 1)
 #define GRID_HALF_Y (grid.max_y >> 1)
 

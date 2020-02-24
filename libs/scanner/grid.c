@@ -94,7 +94,7 @@ void grid_calibrate() {
 
     motor_reset_tick();
     grid_home();
-    grid_move_to_point(0, 100);
+    grid_move_to_point(0, grid.max_y / 2);
     motor_set_tick(motor_tick);
 
     // it is always zero idc
@@ -102,9 +102,9 @@ void grid_calibrate() {
     serial_printf("x offset: %d\r\n", grid.x_offset);
 
     serial_printf("find x max\r\n");
-    motor_set(825, 0, 0);
-    _run_until_thresh(DIR_NEGATIVE, 3800, int_time);
-    grid.max_x = 825 - motors.x_steps;
+    motor_set(1100, 0, 0);
+    _run_until_thresh(DIR_NEGATIVE, 4000, int_time);
+    grid.max_x = 1100 - motors.x_steps;
     serial_printf("x max: %d\r\n", grid.max_x);
 
     motor_reset_tick();

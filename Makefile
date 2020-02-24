@@ -42,7 +42,9 @@ LIBSC		= libs/*.c libs/scanner/*.c
 LIBS		= $(shell echo $(LIBSC) | sed s/\\.c/\\.o/g)
 TASKSC      = tasks/*.c
 TASKS		= $(shell echo $(TASKSC) | sed s/\\.c/\\.o/g)
-OBJ			= $(LIBS) $(TASKS) main.o
+INDIVC      = individual/rory/*.c
+INDIV		= $(shell echo $(INDIVC) | sed s/\\.c/\\.o/g)
+OBJ			= $(LIBS) $(TASKS) $(INDIV) main.o
 
 # Targets
 all:	main

@@ -15,7 +15,7 @@ void timer_init() {
     TIM_Init(LPC_TIM3, TIM_TIMER_MODE, &cfg);
     TIM_Cmd(LPC_TIM3, ENABLE);
 
-    LPC_TIM3->MCR = 0b011;
+    LPC_TIM3->MCR = 0b001;
     LPC_TIM3->MR0 = 500;
 
     LPC_TIM3->CCR = 0;
@@ -29,6 +29,7 @@ uint32_t timer_get() {
 
 void timer_block(uint32_t ms) {
     uint32_t init = timer_get();
+    // serial_printf("[Timer]: init %dms block:%d\r\n", ms, init);
     while (timer_get() - init < ms)
         ;
 }

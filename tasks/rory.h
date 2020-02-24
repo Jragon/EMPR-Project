@@ -1,1 +1,0 @@
-void detect_edges();

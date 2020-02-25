@@ -165,6 +165,7 @@ void _reset_errors() {
     }
 }
 
+#define SQUARE_TOLERANCE 50
 void recognise() {
     serial_printf("[Rory]: Recognise Image\r\n");
     lcd_clear_display();
@@ -189,11 +190,18 @@ void recognise() {
 
     uint16_t colours[4] = {0};
     uint8_t point_index = 0;
+    uint8_t flipped = scan.width < scan.height ? 0 : 1;
+    uint8_t square = ABS(scan.width - scan.height) < SQUARE_TOLERANCE ? 1 : 0;
     sensor_read_all_colours(colours);
     for (int i = 1; i <= POINTS; i++) {
         for (int j = 1; j <= POINTS; j++) {
-            grid_move_to_point(scan.startX + scan.widthStep * j,
-                               scan.startY + scan.heightStep * i);
+            if (flipped == 0) {
+                grid_move_to_point(scan.startX + scan.widthStep * j,
+                                   scan.startY + scan.heightStep * i);
+            } else {
+                grid_move_to_point(scan.startX + scan.widthStep * i,
+                                   scan.startY + scan.heightStep * j);
+            }
             timer_block(int_time);
             while (sensor_ready() == 0) {
                 serial_printf("Sensor not ready\r\n");

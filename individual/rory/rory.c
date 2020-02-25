@@ -40,8 +40,8 @@ void _step_to_thresh(uint16_t x, uint16_t y, uint16_t* colours, uint16_t* last_c
             uint16_t diff = ABS((int)(last_colours[i] - colours[i]));
             if (diff > thresh) {
                 found = 1;
-                lcd_printf(0x00, "C %5d, R %5d", colours[0], colours[1]);
-                lcd_printf(0x40, "G %5d, B %5d", colours[2], colours[3]);
+                // lcd_printf(0x00, "C %5d, R %5d", colours[0], colours[1]);
+                // lcd_printf(0x40, "G %5d, B %5d", colours[2], colours[3]);
                 break;
             }
             last_colours[i] = colours[i];
@@ -155,9 +155,14 @@ int _get_min_error() {
 
 void recognise() {
     serial_printf("[Rory]: Recognise Image\r\n");
+    lcd_clear_display();
+    lcd_printf(0x00, "Detecting image");
 
     scan_t scan;
     _get_edge_data(&scan);
+
+    lcd_clear_display();
+    lcd_printf(0x00, "Scanning image");
 
     sensor_set_gain(SENSOR_GAIN_16X);
     sensor_set_int_time(3);
@@ -189,7 +194,12 @@ void recognise() {
     int min_index = _get_min_error();
     serial_printf("%s: %.2f%%\r\n", data[min_index].name,
                   (float)(100 - data[min_index].error / 1000));
+    lcd_clear_display();
     lcd_printf(0, "%s", data[min_index].name);
-    lcd_printf(0x40, "%.2f%% match", (float)(100 - data[min_index].error / 1000));
+    lcd_printf(0x40, "%.2f%% match",
+               (float)(100.0 - (float)(data[min_index].error / 1000)));
     grid_move_to_point(grid.max_y, grid.max_y);
+
+    while (1)
+        ;
 }

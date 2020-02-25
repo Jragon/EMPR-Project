@@ -10,6 +10,7 @@ struct data {
     uint16_t height;
     // multiplied by 1000
     int errors[4];
+    uint8_t square;
 } typedef data_t;
 
 extern data_t data[];

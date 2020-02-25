@@ -189,14 +189,14 @@ void recognise() {
 
     serial_printf("[Rory]: Starting Scan\r\n");
     _reset_errors();
-    serial_printf("[Data]: .width = %d, .height = %d, .vals = {", scan.width,
-                  scan.height);
 
     uint16_t colours[4] = {0};
     uint8_t point_index = 0;
     uint8_t flipped = scan.width < scan.height ? 0 : 1;
-    uint8_t square = (ABS((int)(scan.width - scan.height)) < SQUARE_TOLERANCE) ? 1 : 0;
-
+    uint8_t square =
+      ((ABS((int)(scan.width - scan.height))) < (SQUARE_TOLERANCE)) ? 1 : 0;
+    serial_printf("[Data]: .width = %d, .height = %d, .square = %d, .vals = {",
+                  scan.width, scan.height, square);
     sensor_read_all_colours(colours);
     for (int col = 1; col <= COLS; col++) {
         serial_printf("{");
@@ -228,7 +228,7 @@ void recognise() {
                     data[scan_index].errors[1] +=
                       ABS((int)(data[scan_index].vals[COLS - col][ROWS - row][k] -
                                 colours[k + 1]));
-                    if (square == 1) {
+                    if (square == 1 || data[scan_index].square == 1) {
                         // calculate transpose errors
                         data[scan_index].errors[2] +=
                           ABS((int)(data[scan_index].vals[row - 1][col - 1][k] -
@@ -255,7 +255,7 @@ void recognise() {
 
     serial_printf("%s: %d%% forward / %d%% reverse match\r\n", data[min_index].name,
                   data[min_index].errors[0], data[min_index].errors[1]);
-    if (square == 1) {
+    if (data[min_index].square == 1) {
         data[min_index].errors[2] = 100 - data[min_index].errors[2] / 1000;
         data[min_index].errors[3] = 100 - data[min_index].errors[3] / 1000;
 
@@ -272,7 +272,7 @@ void recognise() {
                   scan_timer - detect_time, scan_timer);
     lcd_clear_display();
     lcd_printf(0, "%s", data[min_index].name);
-    lcd_printf(0x40, "%d%%/%d%% match", e_fwd, e_rev);
+    lcd_printf(0x40, "%d%% match", MAX(e_fwd, e_rev));
     grid_move_to_point(grid.max_y, grid.max_y);
 
     while (1)

@@ -1,3 +1,4 @@
+from inputimeout import inputimeout, TimeoutOccurred
 import serial
 import re
 import os
@@ -17,10 +18,20 @@ def collateScans():
         fs = ',\n'.join(scans)
         f.write(f"data_t data[] = {{ \n {fs} \n  }};")
 
+    with open("data_len.h", "w") as f:
+        f.write(f"#define DATA_LEN {len(scans)}\n")
 
-def scan():
-    print("[Python]: scan")
-    name = input("[Python] Enter scan name: ")
+
+def scan(check=False):
+    print("[Python]: scanner!")
+    if check:
+        try:
+            x = inputimeout(
+                prompt="[Python]: Would you like to store this scan? ", timeout=3)
+        except TimeoutOccurred:
+            return
+
+    name = input("[Python]: Enter scan name: ")
     print("[Python]: Scanning ...")
 
     line = ser.readline()
@@ -55,6 +66,8 @@ def main():
 
         if dec:
             print(dec, end='')
+            if "Recognise" in dec:
+                scan(check=True)
             if "Scan Image" in dec:
                 scan()
 

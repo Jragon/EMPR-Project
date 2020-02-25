@@ -137,20 +137,32 @@ void detect_scan() {
     grid_move_to_point(grid.max_y, grid.max_y);
 }
 
-#define DATA_LEN 6
 int _get_min_error() {
     int min_index = 0;
     int min = data[min_index].error;
     serial_printf("Errors: \r\n");
     for (uint8_t scan_index = 0; scan_index < DATA_LEN; scan_index++) {
-        serial_printf("%s: %d\r\n", data[scan_index].name, data[scan_index].error);
+        serial_printf("\t%-10s %d / %d\r\n", data[scan_index].name,
+                      data[scan_index].error, data[scan_index].error_rev);
         if (data[scan_index].error < min) {
             min_index = scan_index;
             min = data[scan_index].error;
         }
+
+        if (data[scan_index].error_rev < min) {
+            min_index = scan_index;
+            min = data[scan_index].error_rev;
+        }
     }
 
     return min_index;
+}
+
+void _reset_errors() {
+    for (uint8_t scan_index = 0; scan_index < DATA_LEN; scan_index++) {
+        data[scan_index].error = 0;
+        data[scan_index].error_rev = 0;
+    }
 }
 
 void recognise() {
@@ -158,8 +170,10 @@ void recognise() {
     lcd_clear_display();
     lcd_printf(0x00, "Detecting image");
 
+    uint32_t scan_timer = timer_get();
     scan_t scan;
     _get_edge_data(&scan);
+    uint32_t detect_time = timer_get() - scan_timer;
 
     lcd_clear_display();
     lcd_printf(0x00, "Scanning image");
@@ -168,7 +182,13 @@ void recognise() {
     sensor_set_int_time(3);
     uint16_t int_time = sensor_get_int_time();
 
+    serial_printf("[Rory]: Starting Scan\r\n");
+    _reset_errors();
+    serial_printf("[Data]: .width = %d, .height = %d, .vals = {", scan.width,
+                  scan.height);
+
     uint16_t colours[4] = {0};
+    uint8_t point_index = 0;
     sensor_read_all_colours(colours);
     for (int i = 1; i <= POINTS; i++) {
         for (int j = 1; j <= POINTS; j++) {
@@ -181,23 +201,39 @@ void recognise() {
             }
             sensor_read_all_colours(colours);
 
+            serial_printf("{%d, %d, %d}%c ", colours[1], colours[2], colours[3],
+                          (i == POINTS && j == POINTS) ? '}' : ',');
+
             // compare current results an store error
             for (uint8_t scan_index = 0; scan_index < DATA_LEN; scan_index++) {
-                for (uint8_t j = 0; j < 3; j++) {
+                for (uint8_t k = 0; k < 3; k++) {
                     data[scan_index].error +=
-                      ABS((int)(data[scan_index].vals[i][j] - colours[j + 1]));
+                      ABS((int)(data[scan_index].vals[point_index][k] - colours[k + 1]));
+                    data[scan_index].error_rev += ABS(
+                      (int)(data[scan_index].vals[POINTS * POINTS - point_index - 1][k] -
+                            colours[k + 1]));
                 }
             }
+
+            point_index++;
         }
     }
+    serial_printf("\r\n");
 
     int min_index = _get_min_error();
-    serial_printf("%s: %.2f%%\r\n", data[min_index].name,
-                  (float)(100 - data[min_index].error / 1000));
+    // float e =
+    //   100.0 - (float)(MIN(data[min_index].error, data[min_index].error_rev) / 1000);
+    uint16_t e_fwd = 100 - data[min_index].error / 1000;
+    uint16_t e_rev = 100 - data[min_index].error_rev / 1000;
+
+    serial_printf("%s: %d%% forward / %d%% reverse match\r\n", data[min_index].name,
+                  e_fwd, e_rev);
+    scan_timer = timer_get() - scan_timer;
+    serial_printf("Detection in %dms, scan in %dms, %dms in total\r\n", detect_time,
+                  scan_timer - detect_time, scan_timer);
     lcd_clear_display();
     lcd_printf(0, "%s", data[min_index].name);
-    lcd_printf(0x40, "%.2f%% match",
-               (float)(100.0 - (float)(data[min_index].error / 1000)));
+    lcd_printf(0x40, "%d%%/%d%% match", e_fwd, e_rev);
     grid_move_to_point(grid.max_y, grid.max_y);
 
     while (1)

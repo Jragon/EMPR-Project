@@ -67,6 +67,9 @@ clean:
 	rm -f *.elf *.wrn bin/*.bin log *.hex
 	rm -f $(EXECNAME)
 
+clean_individual:
+	rm -f individual/*.o individual/*/*.o
+
 USER:=$(shell whoami)
 
 install:

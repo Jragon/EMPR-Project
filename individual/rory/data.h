@@ -1,14 +1,15 @@
 #include <lpc_types.h>
 
 #include "data_len.h"
+#define COLS 4
+#define ROWS 4
 struct data {
     char name[16];
-    uint16_t vals[16][3];
+    uint16_t vals[COLS][ROWS][3];
     uint16_t width;
     uint16_t height;
     // multiplied by 1000
-    uint16_t error;
-    uint16_t error_rev;
+    int errors[4];
 } typedef data_t;
 
 extern data_t data[];

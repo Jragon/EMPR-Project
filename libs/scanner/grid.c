@@ -61,7 +61,7 @@ void grid_calibrate() {
 
     serial_printf("calibrating grid\r\n");
 
-    // fuck knows why we need this ... timings somewhere are dodgy
+    // fix dodgy timings
     timer_block(2);
     // set the gain high since all we're interested in is whether the sensor reads nothing
     // or anything (ie on the platform or not on the platform).
@@ -89,7 +89,7 @@ void grid_calibrate() {
     // carry on moving along the y axis until we fall off the platform
     motor_set(0, 1500, 0);
     _run_until_thresh(DIR_NEGATIVE, 4000, int_time);
-    grid.max_y = 1500 - motors.y_steps - 64;
+    grid.max_y = 1500 - motors.y_steps - 100;
     serial_printf("y max: %d\r\n", grid.max_y);
 
     motor_reset_tick();
@@ -104,7 +104,7 @@ void grid_calibrate() {
     serial_printf("find x max\r\n");
     motor_set(1100, 0, 0);
     _run_until_thresh(DIR_NEGATIVE, 4000, int_time);
-    grid.max_x = 1100 - motors.x_steps;
+    grid.max_x = 1100 - motors.x_steps - 100;
     serial_printf("x max: %d\r\n", grid.max_x);
 
     motor_reset_tick();

@@ -1,8 +1,10 @@
 #include "libs/keypad.h"
 #include "libs/scanner/grid.h"
+#include "libs/serial.h"
 
-uint8_t _manmove() {
+int _manmove() {
     char k = keypad_read();
+
     switch (k) {
         case '1':
             grid_x_steps(8);
@@ -23,9 +25,9 @@ uint8_t _manmove() {
             grid_z_steps(-8);
             break;
         default:
-            return -1;
+            return 0;
             break;
     }
 
-    return 0;
+    return 1;
 }

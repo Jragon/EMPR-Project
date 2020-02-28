@@ -59,6 +59,13 @@ void task_A2_edge_detection() {
     lcd_clear_display();
 
     grid_calibrate();
+
+    lcd_clear_display();
+    lcd_printf(0x00, "Max: (%3d, %3d)", grid.max_x, grid.max_y);
+    lcd_printf(0x40, "Min: (%3d, %3d)", grid.x_offset, grid.y_offset);
+
+    while (1)
+        ;
 }
 
 void task_A3_manual_move() {
@@ -69,13 +76,17 @@ void task_A3_manual_move() {
 
     grid_home();
 
+    lcd_printf(0x00, "X: %4d, Y: %4d", grid.x, grid.y);
+    lcd_printf(0x40, "Z: %4d", grid.z);
+
     uint32_t time = timer_get();
     while (1) {
         if (timer_get() - time < 7) {
             continue;
         }
         time = timer_get();
-        if (_manmove() == -1) {
+
+        if (_manmove() == 0) {
             continue;
         }
 

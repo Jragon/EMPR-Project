@@ -20,21 +20,28 @@ void task_B1_rgb_man_move() {
 
     lcd_printf(0x00, "homing...");
 
+    sensor_set_gain(SENSOR_GAIN_16X);
+    sensor_set_int_time(3);
+    uint16_t int_time = sensor_get_int_time();
+
     grid_home();
+    timer_block(int_time);
 
     uint16_t rgb_vals[4] = {0};
     sensor_read_all_colours(rgb_vals);
-    uint32_t time = timer_get();
+    lcd_printf(0x00, "C %5d, R %5d", rgb_vals[0], rgb_vals[1]);
+    lcd_printf(0x40, "G %5d, B %5d", rgb_vals[2], rgb_vals[3]);
 
+    uint32_t time = timer_get();
     while (1) {
         if (timer_get() - time < 7) {
             continue;
         }
         time = timer_get();
 
-        if (_manmove() == -1) {
-            continue;
-        }
+        _manmove();
+
+        timer_block(int_time);
 
         sensor_read_all_colours(rgb_vals);
         lcd_printf(0x00, "C %5d, R %5d", rgb_vals[0], rgb_vals[1]);

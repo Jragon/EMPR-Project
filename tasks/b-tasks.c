@@ -49,6 +49,8 @@ void task_B1_rgb_man_move() {
     }
 }
 
+#define ROW_STEP 20
+#define COL_STEP 20
 void _scan_row(uint16_t row, uint16_t int_time, uint8_t lcd, uint8_t serial) {
     uint16_t col = 0;
     uint16_t red, green, blue;
@@ -73,7 +75,7 @@ void _scan_row(uint16_t row, uint16_t int_time, uint8_t lcd, uint8_t serial) {
             lcd_printf(0x40, "G %5d B %5d", green, blue);
         }
 
-        col += 10;
+        col += COL_STEP;
     }
 
     serial_printf("\n");
@@ -87,7 +89,7 @@ void task_B2_raster_scan() {
     sensor_set_int_time(3);
     uint16_t int_time = sensor_get_int_time();
 
-    for (int row = 0; row < grid.max_x; row += 25) {
+    for (int row = 0; row < grid.max_x; row += ROW_STEP) {
         _scan_row(row, int_time, 1, 1);
     }
 

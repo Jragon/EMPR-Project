@@ -4,6 +4,9 @@ import os
 import array
 import imagehash
 import pickle
+import cv2
+import numpy as np
+from PIL import Image
 
 ser = serial.Serial('/dev/ttyACM0', 115200)
 ppm = []
@@ -63,6 +66,46 @@ def scanFlag():
     collateFlags()
 
 
+def raster():
+    out = []
+    print("[Python]: Raster Scan")
+    line = ser.readline()
+    max_val = 0
+    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('image', 500, 500)
+
+    while (True):
+        dec = line.decode()
+        print(dec)
+        if "end" in dec:
+            break
+
+        arr = dec.strip()[:-1].split(';')
+        max_val = max(max([max(map(int, x.split(' '))) for x in arr]), max_val)
+        # arr = [[int(val) / max_val * 255 for val in vals.split(' ')]
+        #        for vals in arr]
+
+        for vals in arr:
+            rgb = [int(int(val) / max_val * 255) for val in vals.split(' ')]
+            out.extend(rgb)
+
+        print(out)
+        print(len(arr), max_val)
+        # out.extend(arr)
+
+        outb = bytes(out)
+        im = Image.frombytes(
+            'RGB', (len(arr), int(len(out) / len(arr) / 3)), outb)
+        im.save("out.png")
+
+        # cvim = cv2.imread(np.array(im))
+        # cv2.resizeWindow('image', (len(arr), int(len(out) / len(arr) / 3)))
+        cv2.imshow('image', cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR))
+        cv2.waitKey(1)
+
+        line = ser.readline()
+
+
 def main():
     line = ser.readline()
     scan = False
@@ -75,7 +118,8 @@ def main():
         if dec:
             print(dec, end='')
             if "Raster" in dec:
-                scanPPM()
+                # scanPPM()
+                raster()
             elif "Flag Scan" in dec:
                 scanFlag()
 

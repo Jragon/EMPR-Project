@@ -12,100 +12,91 @@
 #include "libs/timer.h"
 #include "libs/util_macros.h"
 
-// void _move_print_rgb(uint16_t x, uint16_t y, uint16_t step, uint16_t int_time) {
-//     uint16_t red, green, blue;
-//     uint32_t last_time = timer_get();
-//     uint16_t movex, movey;
-//     uint8_t tw = 0;
-//     while (x != grid.x || y != grid.y) {
-//         if (timer_get() - last_time < int_time << 2) {
-//             continue;
-//         }
+uint16_t _sum_start_end(uint16_t* lst, uint16_t start, uint16_t end) {
+    uint16_t sum = 0;
+    for (int i = start; i < end; i++) {
+        sum += lst[i];
+    }
 
-//         sensor_read_rgb(&red, &green, &blue);
+    return sum;
+}
 
-//         // if (tw == 0 && red != 2048 && green != 2048 && blue != 2048) {
-//         //     systick_delay_blocking(500);
-//         //     tw = 1;
-//         // }
+uint16_t _sum_colours(uint16_t* colours) {
+    return _sum_start_end(colours, 0, 4);
+}
 
-//         // if (tw == 1 && red == 2048 && green == 2048 && blue == 2048) {
-//         //     systick_delay_blocking(500);
-//         //     tw = 0;
-//         // }
+uint8_t _step_until_edge(uint16_t start_x, uint16_t start_y, uint16_t end_x,
+                         uint16_t end_y, uint16_t step, uint32_t inttime, uint16_t diff) {
+    grid_move_to_point(start_x, start_y);
+    timer_block(inttime);
+    uint16_t colours[4] = {0};
+    sensor_read_all_colours(colours);
 
-//         grid_step_to_point(x, y, step);
+    uint16_t sum, last_sum = _sum_colours(colours);
 
-//         last_time = timer_get();
+    while (grid.x != end_x || grid.y != end_y) {
+        grid_step_to_point(end_x, end_y, step);
+        timer_block(inttime);
 
-//         lcd_printf(0x00, "R %5d       ", red);
-//         lcd_printf(0x40, "G %5d B %5d", green, blue);
-//         serial_printf("%d %d: %d %d %d;", grid.x - step, grid.y - step, red, green,
-//         blue);
-//     }
-// }
+        sensor_read_all_colours(colours);
+        sum = _sum_colours(colours);
 
-// void flag_edge_detect() {
-//     serial_printf("[Task]: Flag Edge Detect\r\n");
-//     grid_home();
+        // serial_printf("%d - %d = %d\r\n", last_sum, sum, ABS(last_sum - sum));
 
-//     sensor_set_gain(SENSOR_GAIN_16X);
-//     sensor_set_int_time(3);
-//     uint16_t int_time = sensor_get_int_time();
+        if (ABS(last_sum - sum) > diff) {
+            return 1;
+            break;
+        }
 
-//     // do three horizontal scans and three vertical scans
-//     // then take max value
+        last_sum = sum;
+    }
 
-//     // x axis scan
-//     // uint16_t x_scans[3] = {100, 450, 700};
-//     // for (int i = 0; i < 3; i++) {
-//     //     grid_move_to_point(x_scans[i], 0);
-//     //     systick_delay_blocking(100);
-//     //     _move_print_rgb(x_scans[i], grid.max_y, 20, int_time);
-//     //     systick_delay_blocking(100);
-//     // }
+    return 0;
+}
 
-//     // uint16_t y_scans[3] = {100, 450, 700};
-//     // for (int i = 0; i < 3; i++) {
-//     //     grid_move_to_point(0, y_scans[i]);
-//     //     // systick_delay_blocking(100);
-//     //     _move_print_rgb(grid.max_x, y_scans[i], 5, int_time);
-//     //     // systick_delay_blocking(100);
-//     // }
+void _detect_flag(uint16_t* min_x, uint16_t* min_y, uint16_t step, uint32_t inttime) {
+    // detects the two edges of the flags -- assumed positioned at MAXX MAXY
+    grid_home();
+    serial_printf("[Flag]: Detecting Flag\r\n");
+    lcd_clear_display();
+    lcd_printf(0x00, "Finding edges");
 
-//     // diagonal scan
-//     while (1) {
-//         grid_move_to_point(0, 0);
-//         _move_print_rgb(grid.max_x, grid.max_y, 5, int_time);
+    if (_step_until_edge(0, 700, grid.max_x, 700, 50, inttime, 600) == 0) {
+        serial_printf("[Flag]: FAILED TO FIND X EDGE! :(\r\n");
+        lcd_clear_display();
+        lcd_printf(0x00, "Failed to");
+        lcd_printf(0x40, "find x edge :(");
+        while (1)
+            ;
+    }
 
-//         grid_move_to_point(0, grid.max_y);
-//         _move_print_rgb(grid.max_x, 0, 5, int_time);
-//     }
-// }
+    *min_x = grid.x;
+    serial_printf("[Flag]: X edge detected at %d", *min_x);
+
+    if (_step_until_edge(700, 0, 700, grid.max_y, 10, inttime, 600) == 0) {
+        serial_printf("[Flag]: FAILED TO FIND Y EDGE! :(\r\n");
+        lcd_clear_display();
+        lcd_printf(0x00, "Failed to");
+        lcd_printf(0x40, "find y edge :(");
+        while (1)
+            ;
+    }
+
+    *min_y = grid.y;
+}
 
 #define STEP_X 150
 #define STEP_Y 150
 void flag_scan() {
     serial_printf("[Task]: Flag Scan\r\n");
-    grid_home();
 
     sensor_set_gain(SENSOR_GAIN_16X);
     sensor_set_int_time(3);
-    uint16_t int_time = sensor_get_int_time();
+    uint16_t inttime = sensor_get_int_time();
 
-    serial_printf("{");
-    uint16_t red, green, blue;
-    for (uint8_t row = 1; row < 5; row++) {
-        for (uint8_t col = 1; col < 4; col++) {
-            grid_move_to_point(grid.max_x - STEP_X * col, grid.max_y - STEP_Y * row);
-            timer_block(int_time);
-            sensor_read_rgb(&red, &green, &blue);
-            serial_printf("{%d, %d, %d}%c ", red, green, blue,
-                          (row == 4 && col == 3) ? '}' : ',');
-        }
-    }
+    uint16_t min_x = 0, min_y = 0;
 
-    serial_printf("\r\n");
+    _detect_flag(&min_x, &min_y, 100, inttime);
 }
 
 struct flag {

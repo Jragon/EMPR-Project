@@ -11,6 +11,7 @@
 #include "libs/serial.h"
 #include "libs/systick_delay.h"
 #include "libs/timer.h"
+#include "libs/util_macros.h"
 
 #include "tasks.h"
 
@@ -130,58 +131,71 @@ void task_B3_color_search() {
         last_time = timer_get();
     }
 
-#define MIN_X 400
-#define MIN_Y 400
-#define MAX_X 800
-#define MAX_Y 800
-#define STEP 10
+#define MIN_X 200
+#define MIN_Y 200
+#define MAX_X 700
+#define MAX_Y 700
+#define STEP 25
 
     sensor_set_gain(SENSOR_GAIN_16X);
     sensor_set_int_time(3);
     uint16_t int_time = sensor_get_int_time();
 
-    uint16_t max_val = 0, x = 0, y = 0, intval;
-    uint16_t red, green, blue;
+    uint16_t min_val = -1, x = 0, y = 0;
+    int intval = 0;
+    uint16_t colours[4] = {0};
 
     grid_move_to_point(MIN_X, MIN_Y);
 
-    while (grid.x < MAX_X) {
-        while (grid.y < MAX_Y) {
+    while (grid.y < MAX_X) {
+        while (grid.x < MAX_Y) {
             if (timer_get() - last_time < int_time << 2) {
                 continue;
             }
 
-            sensor_read_rgb(&red, &green, &blue);
             last_time = timer_get();
-            grid_move_to_point(grid.x, grid.y + STEP);
+            grid_move_to_point(grid.x + STEP, grid.y);
 
-            lcd_printf(0x00, "R %5d       ", red);
-            lcd_printf(0x40, "G %5d B %5d", green, blue);
+            sensor_read_all_colours(colours);
+            lcd_printf(0x00, "C %5d, R %5d", colours[0], colours[1]);
+            lcd_printf(0x40, "G %5d, B %5d", colours[2], colours[3]);
+
+            // normalize results
+            for (int i = 1; i < 4; i++) {
+                colours[i] = colours[i] * 255 / colours[0];
+            }
 
             switch (find) {
                 case 'R':
-                    intval = red;
-                    break;
-                case 'B':
-                    intval = blue;
+                    intval = ABS(255 - colours[1]) + colours[2] + colours[3];
                     break;
                 case 'G':
-                    intval = green;
+                    intval = colours[1] + ABS(255 - colours[2]) + colours[3];
+                    break;
+                case 'B':
+                    intval = colours[1] + colours[2] + ABS(255 - colours[3]);
                     break;
             }
 
             // this will always return the whitest point which should fulfill the spec,
             // but I'm not sure chris will see it that way. It needs to find the reddest
             // point. IE red is at max whilst blue and green are the lowest.
-            if (intval > max_val) {
-                max_val = intval;
+            if (intval < min_val) {
+                min_val = intval;
                 x = grid.x;
                 y = grid.y;
             }
+            // serial_printf("(%d, %d): int: %d\r\n", grid.x, grid.y, intval);
         }
 
-        grid_move_to_point(grid.x + STEP, MIN_Y);
+        grid_move_to_point(MIN_X, grid.y + STEP);
     }
 
     grid_move_to_point(x, y);
+    lcd_clear_display();
+    lcd_printf(0, "Most %c point", find);
+    lcd_printf(0x40, "(%d, %d)", x, y);
+
+    while (1)
+        ;
 }

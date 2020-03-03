@@ -1,6 +1,7 @@
 #include <lpc_types.h>
 
 #include <math.h>
+#include <string.h>
 
 #include "libs/keypad.h"
 #include "libs/lcd.h"
@@ -24,33 +25,43 @@ uint16_t _sum_start_end(uint16_t* lst, uint16_t start, uint16_t end) {
 }
 
 uint16_t _sum_colours(uint16_t* colours) {
-    return _sum_start_end(colours, 1, 4) * 255 / colours[0];
+    return (_sum_start_end(colours, 1, 4) * 255) / colours[0];
 }
 
+void _normalize_colours(uint16_t* colours) {
+    for (int i = 1; i < 4; i++) {
+        colours[i] = (colours[i] * 255) / colours[0];
+    }
+}
+
+#define ALPHA 0.2
 uint8_t _step_until_edge(uint16_t start_x, uint16_t start_y, uint16_t end_x,
                          uint16_t end_y, uint16_t step, uint32_t inttime, uint16_t diff) {
     grid_move_to_point(start_x, start_y);
     timer_block(inttime << 3);
     uint16_t colours[4] = {0};
-    sensor_read_all_colours(colours);
+    uint16_t last_colours[4] = {0};
 
-    uint16_t sum, last_sum = _sum_colours(colours);
+    sensor_read_all_colours(last_colours);
+    _normalize_colours(last_colours);
 
     while (grid.x != end_x || grid.y != end_y) {
         grid_step_to_point(end_x, end_y, step);
         timer_block(inttime);
 
         sensor_read_all_colours(colours);
-        sum = _sum_colours(colours);
+        _normalize_colours(colours);
 
-        // serial_printf("%d - %d = %d\r\n", last_sum, sum, ABS(last_sum - sum));
-
-        if (ABS(last_sum - sum) > diff) {
-            return 1;
-            break;
+        // serial_printf("(%3d, %3d) ", grid.x, grid.y);
+        for (int i = 1; i < 4; i++) {
+            // serial_printf("- %3d / %3d ", colours[i], last_colours[i]);
+            if (ABS(colours[i] - last_colours[i]) > diff) {
+                return 1;
+            }
         }
+        // serial_printf("\r\n");
 
-        last_sum = sum;
+        memcpy(colours, last_colours, 4);
     }
 
     return 0;
@@ -75,7 +86,7 @@ void _detect_flag(uint16_t* min_x, uint16_t* min_y, uint16_t step, uint32_t intt
     *min_x = grid.x;
     serial_printf("[Flag]: X edge detected at %d\r\n", *min_x);
 
-    if (_step_until_edge(700, 50, 700, grid.max_y, 10, inttime, 25) == 0) {
+    if (_step_until_edge(700, 20, 700, grid.max_y, 10, inttime, 25) == 0) {
         serial_printf("[Flag]: FAILED TO FIND Y EDGE! :(\r\n");
         lcd_clear_display();
         lcd_printf(0x00, "Failed to");
@@ -88,7 +99,7 @@ void _detect_flag(uint16_t* min_x, uint16_t* min_y, uint16_t step, uint32_t intt
     serial_printf("[Flag]: Y edge detected at %d\r\n", *min_y);
 }
 
-#define POINTS 3
+#define POINTS 2
 uint16_t _box_scan_sum(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y,
                        uint32_t inttime) {
     uint16_t width = max_x - min_x;
@@ -136,4 +147,7 @@ void flag_scan() {
     _detect_flag(&min_x, &min_y, 100, inttime);
     uint32_t sum = _box_scan_sum(min_x, min_y, grid.max_x, grid.max_y, inttime);
     serial_printf("[Flag]: scan hash: %d\r\n", sum);
+}
+
+void flag_detect() {
 }

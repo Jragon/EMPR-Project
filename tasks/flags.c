@@ -1,6 +1,5 @@
-#define FLAGS_LEN 10
-#define STEP_X 150
-#define STEP_Y 150
+#include "flags.h"
+
 flag_t flags[] = {{"car",
                    {{524, 837, 994},
                     {971, 1136, 976},

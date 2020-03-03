@@ -135,8 +135,42 @@ uint16_t _box_scan_sum(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t 
     return sum;
 }
 
+void _raster_scan(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y,
+                  uint16_t step, uint16_t inttime) {
+    uint16_t colours[4] = {0};
+    grid_move_to_point(min_x, min_y);
+    timer_block(inttime);
+    sensor_read_all_colours(colours);
+
+    uint8_t direction = 0;
+    while (max_x != grid.x || max_y != grid.y) {
+        timer_block(inttime);
+        sensor_read_all_colours(colours);
+
+        serial_printf("%d %d %d;", colours[1], colours[2], colours[3]);
+
+        if (direction == 0) {
+            grid_step_to_point(grid.x, max_y, step);
+
+            if (grid.y == max_y) {
+                direction = 1;
+                serial_printf("\n");
+                grid_step_to_point(max_x, grid.y, step * 2);
+            }
+        } else {
+            grid_step_to_point(grid.x, min_y, step);
+
+            if (grid.y == min_y) {
+                direction = 0;
+                serial_printf("\n");
+                grid_step_to_point(max_x, grid.y, step * 2);
+            }
+        }
+    }
+}
+
 void flag_scan() {
-    serial_printf("[Task]: Flag Scan\r\n");
+    serial_printf("[Task]: Flag Raster Scan\r\n");
 
     sensor_set_gain(SENSOR_GAIN_16X);
     sensor_set_int_time(3);
@@ -145,8 +179,9 @@ void flag_scan() {
     uint16_t min_x = 0, min_y = 0;
 
     _detect_flag(&min_x, &min_y, 100, inttime);
-    uint32_t sum = _box_scan_sum(min_x, min_y, grid.max_x, grid.max_y, inttime);
-    serial_printf("[Flag]: scan hash: %d\r\n", sum);
+    _raster_scan(min_x, min_y, grid.max_x, grid.max_y, 5, inttime);
+    // uint32_t sum = _box_scan_sum(min_x, min_y, grid.max_x, grid.max_y, inttime);
+    // serial_printf("[Flag]: scan hash: %d\r\n", sum);
 }
 
 void flag_detect() {

@@ -47,8 +47,9 @@ def collateFlags():
         with open(f"./flags/{flagname}") as f:
             flags.append(f.readline().strip())
 
-    with open("flags.c", 'w') as f:
+    with open("../tasks/flags.c", 'w') as f:
         fs = ',\n'.join(flags)
+        f.write('#include "flags.h"\n\n')
         f.write(f"flag_t flags[] = {{ \n {fs} \n  }};")
 
 
@@ -56,14 +57,71 @@ def scanFlag():
     print("[Python]: scan flag")
     name = input("Enter flag name: ")
     print("[Python]: Scanning ...")
-    vals = ser.readline().decode().strip()
+
+    line = ser.readline()
+    while(True):
+        dec = line.decode().strip()
+        print(dec)
+        if "{" in dec:
+            break
+
+        line = ser.readline()
 
     print("[Python]: Writing ...")
     with open(f"flags/{name}", "w") as f:
         # vals come in like {{r, g, b}, ...}
-        f.write(f'{{ "{name}", {vals}, 0 }}')
+        f.write(f'{{ .error={{0}}, .name="{name}", .data={dec} }}')
 
     collateFlags()
+
+
+def scanFlag_2():
+    out = []
+    print("[Python]: Flag Raster(ish) Scan")
+    line = ser.readline()
+    max_val = 0
+    name = input("Flag name: ")
+
+    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
+    cv2.resizeWindow('image', 500, 500)
+
+    while (True):
+        dec = line.decode()
+        print(dec)
+        if "end" in dec:
+            break
+        if "[" in dec:
+            print(dec)
+            line = ser.readline()
+            continue
+
+        dec = dec.strip()[:-1]
+        arr = dec[1:].split(';')
+        if dec[0] == '-':
+            arr = arr[::-1]
+
+        max_val = max(max([max(map(int, x.split(' '))) for x in arr]), max_val)
+
+        for vals in arr:
+            rgb = [int(int(val) / max_val * 255)
+                   for val in vals.split(' ')]
+            out.extend(rgb)
+
+        print(out)
+        print(len(arr), max_val)
+        # out.extend(arr)
+
+        outb = bytes(out)
+        im = Image.frombytes(
+            'RGB', (len(arr), int(len(out) / len(arr) / 3)), outb)
+        im.save(f"flags/{name}.ppm")
+
+        # cvim = cv2.imread(np.array(im))
+        # cv2.resizeWindow('image', (len(arr), int(len(out) / len(arr) / 3)))
+        cv2.imshow('image', cv2.cvtColor(np.array(im), cv2.COLOR_RGB2BGR))
+        cv2.waitKey(1)
+
+        line = ser.readline()
 
 
 def raster():
@@ -117,7 +175,9 @@ def main():
 
         if dec:
             print(dec, end='')
-            if "Raster" in dec:
+            if "Flag Raster Scan" in dec:
+                scanFlag_2()
+            elif "Raster" in dec:
                 # scanPPM()
                 raster()
             elif "Flag Scan" in dec:

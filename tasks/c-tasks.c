@@ -99,9 +99,9 @@ void _detect_flag(uint16_t* min_x, uint16_t* min_y, uint16_t step, uint32_t intt
     serial_printf("[Flag]: Y edge detected at %d\r\n", *min_y);
 }
 
-#define POINTS 2
-uint16_t _box_scan_sum(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y,
-                       uint32_t inttime) {
+#define POINTS 3
+uint16_t _box_scan(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y,
+                   uint32_t inttime) {
     uint16_t width = max_x - min_x;
     uint16_t height = max_y - min_y;
     uint16_t x_step = width / (POINTS + 1);
@@ -112,10 +112,9 @@ uint16_t _box_scan_sum(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t 
 
     uint32_t sum = 0;
 
-    // uint16_t flag[9] = {327, 391, 275, 420, 516, 271, 342, 437, 259};
-    uint16_t flagi = 0;
-
+    serial_printf("{ ");
     for (int i = 1; i < POINTS + 1; i++) {
+        serial_printf("{ ");
         for (int j = 1; j < POINTS + 1; j++) {
             if (width < height) {
                 grid_move_to_point(min_x + x_step * j, min_y + y_step * i);
@@ -124,15 +123,152 @@ uint16_t _box_scan_sum(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t 
             }
             timer_block(inttime);
             sensor_read_all_colours(colours);
+            _normalize_colours(colours);
 
-            sum += _sum_colours(colours);
-            // serial_printf("%d - %d = %d \r\n", flag[flagi], _sum_colours(colours),
-            //               flag[flagi] - _sum_colours(colours));
-            // flagi++;
+            serial_printf("{%d, %d, %d}%s", colours[1], colours[2], colours[3],
+                          j == POINTS ? "" : ", ");
         }
+        serial_printf(" }%c ", i == POINTS ? ' ' : ',');
     }
+    serial_printf("}\r\n");
 
     return sum;
+}
+
+int _hue(int red, int green, int blue) {
+    int min = MIN(MIN(red, green), blue);
+    int max = MAX(MAX(red, green), blue);
+
+    // serial_printf("\r\nCALCING HUE\r\n\t%d, %d: %d, %d, %d\r\n", min, max, red, green,
+    //               blue);
+    if (min == max) {
+        return 0;
+    }
+
+    float hue = 0;
+    if (max == red) {
+        hue = (float)((float)(green - blue) / (float)(max - min));
+    } else if (max == green) {
+        hue = 2 + (float)((float)(blue - red) / (float)(max - min));
+    } else {
+        hue = 4 + (float)((float)(red - green) / (float)(max - min));
+    }
+
+    // serial_printf("\tHUE f = %f\r\n", hue);
+
+    hue = hue * 60;
+    if (hue < 0) {
+        hue = hue + 360;
+    }
+
+    return hue;
+}
+
+uint16_t _box_scan_comp(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y,
+                        uint32_t inttime) {
+    uint16_t width = max_x - min_x;
+    uint16_t height = max_y - min_y;
+    uint16_t x_step = width / (POINTS + 1);
+    uint16_t y_step = height / (POINTS + 1);
+
+    uint16_t colours[4] = {0};
+    sensor_read_all_colours(colours);
+
+    uint32_t sum = 0;
+
+    serial_printf("{ ");
+    for (int i = 1; i < POINTS + 1; i++) {
+        serial_printf("{ ");
+        for (int j = 1; j < POINTS + 1; j++) {
+            if (width < height) {
+                grid_move_to_point(min_x + x_step * j, min_y + y_step * i);
+            } else {
+                grid_move_to_point(min_x + x_step * i, min_y + y_step * j);
+            }
+            timer_block(inttime);
+            sensor_read_all_colours(colours);
+            _normalize_colours(colours);
+            serial_printf("{%d, %d, %d}%s", colours[1], colours[2], colours[3],
+                          j == POINTS ? "" : ", ");
+
+            int hue = _hue(colours[1], colours[2], colours[3]);
+            serial_printf("HUE: %d\r\n", hue);
+
+            // compare against flags and add error
+            for (int flagi = 0; flagi < FLAGS_LEN; flagi++) {
+                serial_printf("%s:\r\n", flags[flagi].name);
+                int flagHue = _hue(flags[flagi].data[i][j][0], flags[flagi].data[i][j][1],
+                                   flags[flagi].data[i][j][2]);
+                int flagHueRev =
+                  _hue(flags[flagi].data[j][i][0], flags[flagi].data[j][i][1],
+                       flags[flagi].data[j][i][2]);
+                serial_printf("\t%d - %d = %d\r\n", hue, flagHue,
+                              MIN(ABS(hue - flagHue), 360 - ABS(hue - flagHue)));
+                serial_printf("\t%d - %d = %d\r\n", hue, flagHueRev,
+                              MIN(ABS(hue - flagHueRev), 360 - ABS(hue - flagHueRev)));
+
+                // for (int k = 0; k < 3; k++) {
+                //     if (width < height) {
+                //         flags[flagi].error[0] +=
+                //           ABS(flags[flagi].data[j][i][k] - colours[k + 1]);
+                //         flags[flagi].error[1] += ABS(
+                //           flags[flagi].data[POINTS - j][POINTS - i][k] - colours[k +
+                //           1]);
+
+                //         // serial_printf("\t%d - %d = %d \r\n",
+                //         // flags[flagi].data[j][i][k],
+                //         //               colours[k],
+                //         //               ABS(flags[flagi].data[j][i][k] - colours[k
+
+                //         //               1]));
+                //     } else {
+                //         flags[flagi].error[0] +=
+                //           ABS(flags[flagi].data[i][j][k] - colours[k]);
+                //         flags[flagi].error[1] += ABS(
+                //           flags[flagi].data[POINTS - i][POINTS - j][k] - colours[k +
+                //           1]);
+
+                //         // serial_printf("\t%d - %d = %d \r\n",
+                //         //               flags[flagi].data[i][j][k + 1], colours[k],
+                //         //               ABS(flags[flagi].data[i][j][k] - colours[k
+
+                //         //               1]));
+                //     }
+                // }
+            }
+        }
+        serial_printf(" }%c ", i == POINTS ? ' ' : ',');
+    }
+    serial_printf("}\r\n");
+
+    return sum;
+}
+
+void _reset() {
+    for (uint8_t flag_index = 0; flag_index < FLAGS_LEN; flag_index++) {
+        for (int i = 0; i < 2; i++) {
+            flags[flag_index].error[i] = 0;
+        }
+    }
+}
+
+int _min_error() {
+    int min_index = 0;
+    int min = flags[min_index].error[0];
+    serial_printf("Errors: \r\n");
+    for (uint8_t flag_index = 0; flag_index < FLAGS_LEN; flag_index++) {
+        serial_printf("%s", flags[flag_index].name);
+        for (int i = 0; i < 2; i++) {
+            serial_printf(" - %d", flags[flag_index].error[i]);
+            if (flags[flag_index].error[i] < min) {
+                min_index = flag_index;
+                min = flags[flag_index].error[i];
+            }
+        }
+        serial_printf("\r\n");
+    }
+
+    return min_index;
 }
 
 void _raster_scan(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y,
@@ -142,34 +278,28 @@ void _raster_scan(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y
     timer_block(inttime);
     sensor_read_all_colours(colours);
 
-    uint8_t direction = 0;
     while (max_x != grid.x || max_y != grid.y) {
         timer_block(inttime);
         sensor_read_all_colours(colours);
+        _normalize_colours(colours);
 
         serial_printf("%d %d %d;", colours[1], colours[2], colours[3]);
 
-        if (direction == 0) {
-            grid_step_to_point(grid.x, max_y, step);
-
-            if (grid.y == max_y) {
-                direction = 1;
-                serial_printf("\n");
-                grid_step_to_point(max_x, grid.y, step * 2);
-            }
-        } else {
-            grid_step_to_point(grid.x, min_y, step);
-
-            if (grid.y == min_y) {
-                direction = 0;
-                serial_printf("\n");
-                grid_step_to_point(max_x, grid.y, step * 2);
+        grid_step_to_point(max_x, grid.y, step);
+        if (grid.x == max_x) {
+            serial_printf("\n");
+            grid_step_to_point(grid.x, max_y, step + 4);
+            if (grid.y != max_y) {
+                grid_move_to_point(min_x, grid.y);
             }
         }
     }
+    serial_printf("end\r\n");
+    serial_printf("at (%d, %d), aiming for (%d, %d)", grid.x, grid.y, grid.max_x,
+                  grid.max_y);
 }
 
-void flag_scan() {
+void flag_raster_scan() {
     serial_printf("[Task]: Flag Raster Scan\r\n");
 
     sensor_set_gain(SENSOR_GAIN_16X);
@@ -179,9 +309,31 @@ void flag_scan() {
     uint16_t min_x = 0, min_y = 0;
 
     _detect_flag(&min_x, &min_y, 100, inttime);
-    _raster_scan(min_x, min_y, grid.max_x, grid.max_y, 5, inttime);
-    // uint32_t sum = _box_scan_sum(min_x, min_y, grid.max_x, grid.max_y, inttime);
-    // serial_printf("[Flag]: scan hash: %d\r\n", sum);
+    _raster_scan(min_x, min_y, grid.max_x, grid.max_y, 8, inttime);
+    grid_home();
+}
+
+void flag_scan() {
+    serial_printf("[Task]: Flag Scan\r\n");
+    _reset();
+
+    sensor_set_gain(SENSOR_GAIN_16X);
+    sensor_set_int_time(3);
+    uint16_t inttime = sensor_get_int_time();
+
+    uint16_t min_x = 0, min_y = 0;
+
+    _detect_flag(&min_x, &min_y, 100, inttime);
+    _box_scan_comp(min_x, min_y, grid.max_x, grid.max_y, inttime);
+    int e = _min_error();
+
+    lcd_clear_display();
+    lcd_printf(0x00, "%s", flags[e].name);
+    lcd_printf(0x40, "%d", MIN(flags[e].error[0], flags[e].error[1]));
+    grid_home();
+
+    while (1)
+        ;
 }
 
 void flag_detect() {

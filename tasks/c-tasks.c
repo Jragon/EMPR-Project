@@ -191,50 +191,21 @@ uint16_t _box_scan_comp(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t
             serial_printf("{%d, %d, %d}%s", colours[1], colours[2], colours[3],
                           j == POINTS ? "" : ", ");
 
-            int hue = _hue(colours[1], colours[2], colours[3]);
-            serial_printf("HUE: %d\r\n", hue);
-
             // compare against flags and add error
             for (int flagi = 0; flagi < FLAGS_LEN; flagi++) {
-                serial_printf("%s:\r\n", flags[flagi].name);
-                int flagHue = _hue(flags[flagi].data[i][j][0], flags[flagi].data[i][j][1],
-                                   flags[flagi].data[i][j][2]);
-                int flagHueRev =
-                  _hue(flags[flagi].data[j][i][0], flags[flagi].data[j][i][1],
-                       flags[flagi].data[j][i][2]);
-                serial_printf("\t%d - %d = %d\r\n", hue, flagHue,
-                              MIN(ABS(hue - flagHue), 360 - ABS(hue - flagHue)));
-                serial_printf("\t%d - %d = %d\r\n", hue, flagHueRev,
-                              MIN(ABS(hue - flagHueRev), 360 - ABS(hue - flagHueRev)));
-
-                // for (int k = 0; k < 3; k++) {
-                //     if (width < height) {
-                //         flags[flagi].error[0] +=
-                //           ABS(flags[flagi].data[j][i][k] - colours[k + 1]);
-                //         flags[flagi].error[1] += ABS(
-                //           flags[flagi].data[POINTS - j][POINTS - i][k] - colours[k +
-                //           1]);
-
-                //         // serial_printf("\t%d - %d = %d \r\n",
-                //         // flags[flagi].data[j][i][k],
-                //         //               colours[k],
-                //         //               ABS(flags[flagi].data[j][i][k] - colours[k
-
-                //         //               1]));
-                //     } else {
-                //         flags[flagi].error[0] +=
-                //           ABS(flags[flagi].data[i][j][k] - colours[k]);
-                //         flags[flagi].error[1] += ABS(
-                //           flags[flagi].data[POINTS - i][POINTS - j][k] - colours[k +
-                //           1]);
-
-                //         // serial_printf("\t%d - %d = %d \r\n",
-                //         //               flags[flagi].data[i][j][k + 1], colours[k],
-                //         //               ABS(flags[flagi].data[i][j][k] - colours[k
-
-                //         //               1]));
-                //     }
-                // }
+                for (int k = 0; k < 3; k++) {
+                    if (width < height) {
+                        flags[flagi].error[0] +=
+                          ABS(flags[flagi].data[j][i][k] - colours[k + 1]);
+                        flags[flagi].error[1] += ABS(
+                          flags[flagi].data[POINTS - j][POINTS - i][k] - colours[k + 1]);
+                    } else {
+                        flags[flagi].error[0] +=
+                          ABS(flags[flagi].data[i][j][k] - colours[k]);
+                        flags[flagi].error[1] += ABS(
+                          flags[flagi].data[POINTS - i][POINTS - j][k] - colours[k + 1]);
+                    }
+                }
             }
         }
         serial_printf(" }%c ", i == POINTS ? ' ' : ',');

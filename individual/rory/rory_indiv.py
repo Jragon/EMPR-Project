@@ -51,7 +51,7 @@ def scan(check=False):
 
     print("[Python]: Writing ...")
     with open(f"scans/{name}", "w") as f:
-        f.write(f'{{ .name = "{name}", .errors = {{-1}}, {vals} }}')
+        f.write(f'{{ .name = "{name}", .errors = {{0}}, {vals} }}')
 
     collateScans()
 

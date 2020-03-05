@@ -104,7 +104,7 @@ void _get_edge_data(scan_t* scan) {
                   scan->widthOffset, scan->heightOffset, scan->startX, scan->startY);
 }
 
-void detect_scan() {
+void rory_detect_scan() {
     serial_printf("[Rory]: Scan Image\r\n");
 
     scan_t scan;

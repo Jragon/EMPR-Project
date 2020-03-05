@@ -6,5 +6,5 @@ struct scanData {
 } typedef scan_t;
 
 void detect_edges();
-void detect_scan();
+void rory_detect_scan();
 void recognise();

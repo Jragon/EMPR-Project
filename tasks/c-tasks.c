@@ -42,14 +42,14 @@ uint8_t _step_until_edge(uint16_t start_x, uint16_t start_y, uint16_t end_x,
     uint16_t last_colours[4] = {0};
 
     sensor_read_all_colours(last_colours);
-    _normalize_colours(last_colours);
+    sensor_normalize_colours(last_colours);
 
     while (grid.x != end_x || grid.y != end_y) {
         grid_step_to_point(end_x, end_y, step);
         timer_block(inttime);
 
         sensor_read_all_colours(colours);
-        _normalize_colours(colours);
+        sensor_normalize_colours(colours);
 
         serial_printf("(%3d, %3d) ", grid.x, grid.y);
         for (int i = 1; i < 4; i++) {
@@ -125,7 +125,7 @@ uint16_t _box_scan(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_
             }
             timer_block(inttime);
             sensor_read_all_colours(colours);
-            _normalize_colours(colours);
+            sensor_normalize_colours(colours);
 
             serial_printf("{%d, %d, %d}%s", colours[1], colours[2], colours[3],
                           j == POINTS ? "" : ", ");
@@ -189,7 +189,7 @@ uint16_t _box_scan_comp(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t
             }
             timer_block(inttime);
             sensor_read_all_colours(colours);
-            _normalize_colours(colours);
+            sensor_normalize_colours(colours);
             serial_printf("{%d, %d, %d}%s", colours[1], colours[2], colours[3],
                           j == POINTS ? "" : ", ");
 
@@ -257,7 +257,7 @@ void _raster_scan(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t max_y
     while (max_x != grid.x || max_y != grid.y) {
         timer_block(inttime);
         sensor_read_all_colours(colours);
-        _normalize_colours(colours);
+        sensor_normalize_colours(colours);
 
         serial_printf("%d %d %d;", colours[1], colours[2], colours[3]);
 

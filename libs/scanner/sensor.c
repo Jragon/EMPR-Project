@@ -91,6 +91,12 @@ void sensor_read_all_colours(uint16_t* colours) {
     }
 }
 
+void sensor_normalize_colours(uint16_t* colours) {
+    for (int i = 1; i < 4; i++) {
+        colours[i] = (colours[i] * 255) / colours[0];
+    }
+}
+
 void sensor_read_rgb(uint16_t* red, uint16_t* green, uint16_t* blue) {
     uint8_t buffer[6] = {0};
     sensor_read_multiple_registers(SENSOR_RDATA, buffer, 6);

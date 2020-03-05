@@ -193,19 +193,22 @@ uint16_t _box_scan_comp(uint16_t min_x, uint16_t min_y, uint16_t max_x, uint16_t
 
             // compare against flags and add error
             for (int flagi = 0; flagi < FLAGS_LEN; flagi++) {
+                float dist1 = 0;
+                float dist2 = 0;
+                // serial_printf("\r\n%s", flags[flagi].name);
                 for (int k = 0; k < 3; k++) {
-                    if (width < height) {
-                        flags[flagi].error[0] +=
-                          ABS(flags[flagi].data[j][i][k] - colours[k + 1]);
-                        flags[flagi].error[1] += ABS(
-                          flags[flagi].data[POINTS - j][POINTS - i][k] - colours[k + 1]);
-                    } else {
-                        flags[flagi].error[0] +=
-                          ABS(flags[flagi].data[i][j][k] - colours[k]);
-                        flags[flagi].error[1] += ABS(
-                          flags[flagi].data[POINTS - i][POINTS - j][k] - colours[k + 1]);
-                    }
+                    dist1 += powf(flags[flagi].data[i - 1][j - 1][k] - colours[k + 1], 2);
+                    dist2 += powf(
+                      flags[flagi].data[POINTS - i][POINTS - j][k] - colours[k + 1], 2);
+                    // serial_printf(
+                    //   "\r\n\t(%d - %d)^2 = %.2f", flags[flagi].data[i - 1][j -
+                    //   1][k], colours[k + 1], powf(flags[flagi].data[i - 1][j -
+                    //   1][k] - colours[k + 1], 2));
                 }
+
+                flags[flagi].error[0] += sqrtf(dist1);
+                flags[flagi].error[1] += sqrtf(dist2);
+                // serial_printf("\r\n\tdist: sqrt(%.2f) = %.3f; accum
             }
         }
         serial_printf(" }%c ", i == POINTS ? ' ' : ',');

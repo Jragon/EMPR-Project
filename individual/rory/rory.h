@@ -7,4 +7,4 @@ struct scanData {
 
 void detect_edges();
 void rory_detect_scan();
-void recognise();
+void rory_recognise();

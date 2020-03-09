@@ -35,9 +35,11 @@ void _step_to_thresh(uint16_t x, uint16_t y, uint16_t* colours, uint16_t* last_c
         // serial_printf("\tC %5d, R %5d, G: %5d, B: %5d\r\n", colours[0], colours[1],
         //               colours[2], colours[3]);
 
+        // serial_printf("(%d, %d): ", grid.x, grid.y);
         for (int i = 0; i < 4; i++) {
             // any change greater than thresh on any channel
             uint16_t diff = ABS((int)(last_colours[i] - colours[i]));
+            // serial_printf("%d-%d=%d; ", last_colours[i], colours[i], diff);
             if (diff > thresh) {
                 found = 1;
                 // lcd_printf(0x00, "C %5d, R %5d", colours[0], colours[1]);
@@ -46,6 +48,7 @@ void _step_to_thresh(uint16_t x, uint16_t y, uint16_t* colours, uint16_t* last_c
             }
             last_colours[i] = colours[i];
         }
+        // serial_printf("\r\n");
     }
 }
 
@@ -63,7 +66,7 @@ void detect_edges(uint16_t* min_x, uint16_t* max_x, uint16_t* min_y, uint16_t* m
     sensor_set_int_time(3);
     uint16_t int_time = sensor_get_int_time();
 
-    grid_move_to_point(GRID_HALF_X, 0);
+    grid_move_to_point(GRID_HALF_X, 50);
     _step_to_thresh(GRID_HALF_X, grid.max_y, colours, last_colours, int_time, THRESH,
                     STEP);
     *min_y = grid.y;
@@ -169,7 +172,7 @@ void _reset_errors() {
 }
 
 #define SQUARE_TOLERANCE 50
-void recognise() {
+void rory_recognise() {
     serial_printf("[Rory]: Recognise Image\r\n");
     lcd_clear_display();
     lcd_printf(0x00, "Detecting image");

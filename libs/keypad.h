@@ -21,6 +21,10 @@ char keypad_read();
 */
 void keypad_set_as_inputs();
 
+/**
+ * @brief waits for ch to be pressed
+ */
+void keypad_wait_key(char ch, uint32_t delay);
 void keypad_set_flag();
 void keypad_reset_flag();
 uint8_t keypad_flag();

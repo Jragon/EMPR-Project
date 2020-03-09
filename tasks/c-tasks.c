@@ -34,7 +34,6 @@ void _normalize_colours(uint16_t* colours) {
     }
 }
 
-#define ALPHA 0.2
 uint8_t _step_until_edge(uint16_t start_x, uint16_t start_y, uint16_t end_x,
                          uint16_t end_y, uint16_t step, uint32_t inttime, uint16_t diff) {
     grid_move_to_point(start_x, start_y);
@@ -52,16 +51,17 @@ uint8_t _step_until_edge(uint16_t start_x, uint16_t start_y, uint16_t end_x,
         sensor_read_all_colours(colours);
         _normalize_colours(colours);
 
-        // serial_printf("(%3d, %3d) ", grid.x, grid.y);
+        serial_printf("(%3d, %3d) ", grid.x, grid.y);
         for (int i = 1; i < 4; i++) {
-            // serial_printf("- %3d / %3d ", colours[i], last_colours[i]);
+            serial_printf("; %3d-%3d=%3d", colours[i], last_colours[i],
+                          ABS(colours[i] - last_colours[i]));
             if (ABS(colours[i] - last_colours[i]) > diff) {
                 return 1;
             }
         }
-        // serial_printf("\r\n");
+        serial_printf("\r\n");
 
-        memcpy(colours, last_colours, 4);
+        memcpy(last_colours, colours, 8);
     }
 
     return 0;
@@ -74,7 +74,7 @@ void _detect_flag(uint16_t* min_x, uint16_t* min_y, uint16_t step, uint32_t intt
     lcd_clear_display();
     lcd_printf(0x00, "Finding edges");
 
-    if (_step_until_edge(0, 700, grid.max_x, 700, 50, inttime, 25) == 0) {
+    if (_step_until_edge(50, 700, grid.max_x, 700, 16, inttime, 16) == 0) {
         serial_printf("[Flag]: FAILED TO FIND X EDGE! :(\r\n");
         lcd_clear_display();
         lcd_printf(0x00, "Failed to");
@@ -85,8 +85,9 @@ void _detect_flag(uint16_t* min_x, uint16_t* min_y, uint16_t step, uint32_t intt
 
     *min_x = grid.x;
     serial_printf("[Flag]: X edge detected at %d\r\n", *min_x);
+    timer_block(100);
 
-    if (_step_until_edge(700, 20, 700, grid.max_y, 10, inttime, 25) == 0) {
+    if (_step_until_edge(700, 20, 700, grid.max_y, 16, inttime, 16) == 0) {
         serial_printf("[Flag]: FAILED TO FIND Y EDGE! :(\r\n");
         lcd_clear_display();
         lcd_printf(0x00, "Failed to");
@@ -97,6 +98,7 @@ void _detect_flag(uint16_t* min_x, uint16_t* min_y, uint16_t step, uint32_t intt
 
     *min_y = grid.y;
     serial_printf("[Flag]: Y edge detected at %d\r\n", *min_y);
+    timer_block(100);
 }
 
 #define POINTS 3
@@ -306,9 +308,5 @@ void flag_scan() {
     lcd_printf(0x40, "%d", MIN(flags[e].error[0], flags[e].error[1]));
     grid_home();
 
-    while (1)
-        ;
-}
-
-void flag_detect() {
+    keypad_wait_key('#', 10);
 }

@@ -1,12 +1,28 @@
+#include "keypad.h"
+
 #include <lpc17xx_i2c.h>
 
 #include "i2c.h"
-#include "keypad.h"
+#include "timer.h"
 
 uint8_t one_hot_decoder_4bit(uint8_t val);
 char keypad_map(uint8_t col, uint8_t row);
 
 volatile uint8_t keypad_int_flag = 0;
+
+void keypad_wait_key(char ch, uint32_t delay) {
+    uint32_t time = timer_get();
+    while (1) {
+        if (timer_get() - time < delay) {
+            continue;
+        }
+        time = timer_get();
+
+        if (keypad_read() == ch) {
+            return;
+        }
+    }
+}
 
 char keypad_read() {
     uint8_t tx, rx, r, row, col;
@@ -72,19 +88,19 @@ uint8_t one_hot_decoder_4bit(uint8_t val) {
     val &= 0x0F;
 
     switch (val) {
-    case 0x01:
-        return 1;
+        case 0x01:
+            return 1;
 
-    case 0x02:
-        return 2;
+        case 0x02:
+            return 2;
 
-    case 0x04:
-        return 3;
+        case 0x04:
+            return 3;
 
-    case 0x08:
-        return 4;
+        case 0x08:
+            return 4;
 
-    default:
-        return 0;
+        default:
+            return 0;
     }
 }

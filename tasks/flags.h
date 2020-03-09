@@ -2,7 +2,7 @@
 
 #define STEP_X 150
 #define STEP_Y 150
-#define FLAGS_LEN 9
+#define FLAGS_LEN 10
 
 struct flag {
     char name[10];

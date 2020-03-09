@@ -1,6 +1,5 @@
 *.o
 .ccls*/
 bin/
-.vscode
 venv
 __pycache__

@@ -1,0 +1,16 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/opt/york/cs/net/lpc1700-cmsis-lite-2011.01.26-i686-1/include/",
+                "${workspaceFolder}"
+            ],
+            "defines": [],
+            "compilerPath": "/opt/york/cs/net/gcc-arm-9.2.0/bin/arm-none-eabi-gcc",
+            "cStandard": "c11",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

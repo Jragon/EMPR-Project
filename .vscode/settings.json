@@ -1,0 +1,16 @@
+{
+  "editor.formatOnSave": true,
+  "files.associations": {
+    "i2c.h": "c",
+    "lpc17xx_i2c.h": "c",
+    "a-tasks.h": "c",
+    "grid.h": "c",
+    "motors.h": "c",
+    "sensor.h": "c"
+  },
+  "C_Cpp.default.cStandard": "c11",
+  "C_Cpp.default.intelliSenseMode": "gcc-x64",
+  "python.venvPath": "./python/venv",
+  "python.pythonPath": "venv/bin/python",
+  "python.linting.pylintArgs": ["--generate-members"]
+}

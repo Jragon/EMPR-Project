@@ -83,12 +83,13 @@ void flag_edge_detect() {
 }
 
 void task_D2_pc_coodrinate_colour() {
+    serial_printf("[Task]: D2 Move and Measure\r\n");
+    grid_home();
+
     lcd_clear_display();
-    char buf[32];
-    while (strcmp(buf, "hello") != 0) {
-        memset(buf, 0, sizeof(buf));
-        serial_read_blocking(buf, 5);
-    }
+    lcd_printf(0x00, "Waiting for");
+    lcd_printf(0x40, "input");
+
     char bufs[8][8];
     memset(bufs, 0, sizeof(bufs));
 
@@ -98,15 +99,18 @@ void task_D2_pc_coodrinate_colour() {
     int coords[2];
     coords[0] = atoi(bufs[0]);
     coords[1] = atoi(bufs[1]);
-    lcd_printf(0x0, "%i - %i", coords[0], coords[1]);
-    grid_home();
+
+    lcd_clear_display();
+    lcd_printf(0x0, "POS: (%3d, %3d)", coords[0], coords[1]);
     grid_move_to_point(coords[0], coords[1]);
-    uint16_t rgb[3];
-    memset(rgb, 0, sizeof(rgb));
-    sensor_read_rgb(rgb, rgb + 1, rgb + 2);
+
+    uint16_t colours[4];
+    sensor_read_all_colours(colours);
+    sensor_normalize_colours(colours);
+
     serial_printf("[Task D2]: Sending rgb values\r\n");
-    serial_printf("%i|%i|%i\r\n", rgb[0], rgb[1], rgb[2]);
-    for (;;)
-        ;
-    // TODO - go to coordinates, read rgb, send that to python.
+    serial_printf("%i|%i|%i\r\n", colours[1], colours[2], colours[3]);
+    lcd_printf(0x40, "(%3d, %3d, %3d)", colours[1], colours[2], colours[3]);
+
+    keypad_wait_key('#', 10);
 }

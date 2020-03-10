@@ -164,6 +164,39 @@ def raster():
         line = ser.readline()
 
 
+def _get_int_input(message):
+    while True:
+        try: 
+            inp = int(input(message))
+        except ValueError:
+            print("Please enter a number")    
+            continue
+
+        return inp
+
+    
+
+def d2_control():
+    x = f'{int(_get_int_input("[Python]: Please enter the x coordinate: ")):04d}'
+    y = f'{int(_get_int_input("[Python]: Please enter the y coordinate: ")):04d}'
+
+    ser.write(x.encode())
+    ser.write(y.encode())
+
+    while True:
+        line = ser.readline()
+        try:
+            dec = line.decode()
+        except:
+            continue
+        print(dec.strip())
+        if "Sending" in dec:
+            break
+
+    rgbstr = ser.readline().decode().replace("'", "")[1:-4]
+    rgb = rgbstr.split("|")
+    print(f"[Python]: R: {rgb[0]}, G: {rgb[1]}, B: {rgb[2]}")
+
 def main():
     line = ser.readline()
     scan = False
@@ -182,9 +215,12 @@ def main():
                 raster()
             elif "Flag Scan" in dec:
                 scanFlag()
+            elif "Move" in dec:
+                d2_control()
 
         line = ser.readline()
 
 
 if __name__ == "__main__":
     main()
+

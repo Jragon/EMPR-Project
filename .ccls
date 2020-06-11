@@ -1,0 +1,3 @@
+gcc
+%c -std=gnu18 -O3 -wall -march=armv7-m 
+-I/opt/york/cs/net/lpc1700-cmsis-lite-2011.01.26-i686-1/include
